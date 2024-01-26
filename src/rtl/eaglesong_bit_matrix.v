@@ -3,11 +3,10 @@ module eaglesong_bit_matrix(
         output requested_bit
     );
 
-    // Source: https://github.com/nervosnetwork/rfcs/blob/dff5235616e5c7aec706326494dce1c54163c4be/rfcs/0010-eaglesong/eaglesong.c#L4
     // Generated with:
     /*
         ```python
-            a = <paste in the array from the C code as list>
+            a = <paste in the bit_matrix[] array from the C code as list> # // Source: https://github.com/nervosnetwork/rfcs/blob/dff5235616e5c7aec706326494dce1c54163c4be/rfcs/0010-eaglesong/eaglesong.c#L4
             arev = reversed(a)
             trev = ''
             for i in arev: trev += str(i)
