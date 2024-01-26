@@ -8,6 +8,10 @@ Created: 2019-07-18
 
 # Eaglesong (Proof-of-Work Function for Nervos CKB)
 
+## Note for the [DeflateAwning/eaglesong-verilog repo](https://github.com/DeflateAwning/eaglesong-verilog)
+This reference folder and its contents are from the [Nervos Network's Requestion for Comments repo](https://github.com/nervosnetwork/rfcs). They are provided under the MIT License, and are duplicated here for convenience.
+
+## Intro
 This document specifies the Eaglesong hash function as it is to be used in the context of Nervos CKB proof-of-work.
 
  * [Notation](#Notation)
