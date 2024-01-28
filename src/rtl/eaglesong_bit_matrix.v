@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module eaglesong_bit_matrix(
         input [7:0] bit_index_to_request,
         output requested_bit
