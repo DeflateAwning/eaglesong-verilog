@@ -16,7 +16,9 @@ module tb_eaglesong_permutation;
     // Register and Wire declarations.
     //----------------------------------------------------------------
     reg [31:0] state_input [15:0];
+    reg [5:0] round_num;
     reg start_eval;
+
     wire [31:0] state_output [15:0];
     wire eval_output_ready;
 
@@ -28,6 +30,7 @@ module tb_eaglesong_permutation;
     //----------------------------------------------------------------
     eaglesong_permutation dut (
         .state_input(state_input),
+        .round_num(round_num),
         .start_eval(start_eval),
 
         .state_output(state_output),
@@ -51,6 +54,9 @@ module tb_eaglesong_permutation;
 
             // main reset
             start_eval <= 1'b0;
+
+            // other good reset
+            round_num <= 6'h0;
         end
     endtask
 
@@ -86,6 +92,7 @@ module tb_eaglesong_permutation;
         state_input[13] <= 32'h00000000;
         state_input[14] <= 32'h00000000;
         state_input[15] <= 32'h00000000;
+        round_num <= 6'h0;
 
         start_eval <= 1'b1; // activate
 
@@ -116,6 +123,8 @@ module tb_eaglesong_permutation;
     //----------------------------------------------------------------
     initial begin : main
         $display(" --- Starting tb_eaglesong_permutation -> main();");
+
+        init_task();
 
         main_test_task();
 

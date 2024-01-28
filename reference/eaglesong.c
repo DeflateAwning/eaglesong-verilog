@@ -254,6 +254,8 @@ void EaglesongPermutation( uint32_t * state ) {
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j] ^ injection_constants[i*16+j];
         }
+        printf("between injection stage and addrotadd stage\n");
+        printf("state  : "); print_array(state, 16); printf("\n");
 
         // addition / rotation / addition
         for( j = 0 ; j < 16 ; j = j + 2 ) {
@@ -266,7 +268,7 @@ void EaglesongPermutation( uint32_t * state ) {
 
         printf("=== END OF ROUND #%d ===\n", i);
         printf("state  : "); print_array(state, 16); printf("\n");
-        break; // debugging
+        exit(1); // DEBUG
     }
 }
 
