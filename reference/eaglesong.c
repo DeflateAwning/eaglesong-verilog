@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+// bit_matrix is 16 x 16
 uint32_t bit_matrix[] = {1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1,
                          0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1,
                          0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1,
@@ -118,7 +120,35 @@ void PrintState( uint32_t * state ) {
     printf("\n");
 }
 
+uint16_t bit_array_to_int16(uint32_t * bit_array, int16_t start, int16_t end) {
+    // bit_array is any length array of elements 0 or 1
+    // helpful function for pretending to index an array
+    // in the way you'd request values from a verilog register
+    uint16_t out = 0;
+
+    if ((start - end) == 15) {
+        // like index: [15:0] or [31:16]
+        for (int16_t i = start; i >= end; i--) {
+            if (bit_array[i])
+                out |= (1 << (i - end));
+        }
+    }
+    else if ((end - start) == 15) {
+        // like index: [0:15] or [16:31]
+        for (int16_t i = 0; i <= 15; i++) {
+            if (bit_array[i + start])
+                out |= (1 << (i));
+        }
+    }
+    else {
+        printf("FATAL ERROR: Invalid start and end in bit_array_to_int16().");
+        exit(1);
+    }
+}
+
 void EaglesongPermutation( uint32_t * state ) {
+    // Arg state: uint32_t state[16];
+
     uint32_t new[16];
     int i, j, k;
 
@@ -126,11 +156,23 @@ void EaglesongPermutation( uint32_t * state ) {
 
     for( i = 0 ; i < num_rounds ; ++i ) {
         // bit matrix
-        for( j = 0 ; j < 16 ; ++j ) {
+        for( j = 0 ; j < 16 ; ++j ) { // j is matrix column
+            ////// REFERENCE WAY ///////
+            // new[j] = 0;
+            // for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
+            //     new[j] = new[j] ^ (bit_matrix[k*16 + j] * state[k]);
+            // }
+
+            ////// TRIAL 1 ///////
             new[j] = 0;
-            for( k = 0 ; k < 16 ; ++k ) {
-                new[j] = new[j] ^ (bit_matrix[k*16 + j] * state[k]);
+            for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
+                if (bit_matrix[k*16 + j])
+                    new[j] = new[j] ^ state[k];
             }
+
+            ////// TRIAL 2 ///////
+            // new[j] = new[j] ^ x;
+            
         }
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = new[j];

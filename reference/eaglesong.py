@@ -119,9 +119,9 @@ def EaglesongRound( state, index ):
     0x59aee281 ,  0x449cb799 ,  0xe01f5605 ,  0xed0e085e ,  0xc9a1a3b4 ,  0xaac481b1 ,  0xc935c39c ,  0xb7d8ce7f ]
 
     # bit matrix
-    new = [0 for i in range(0,16)]
-    for j in range(0, 16):
-        for k in range(0, 16):
+    new = [0] * 16
+    for j in range(0, 16): # j is matrix column
+        for k in range(0, 16): # k is matrix row and state index
             new[j] = new[j] ^ (state[k] * bitmatrix[k][j])
         new[j] = new[j] & 0xffffffff # truncate to 32 bits, if necessary
     state = new
