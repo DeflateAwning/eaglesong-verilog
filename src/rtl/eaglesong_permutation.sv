@@ -32,32 +32,35 @@ module eaglesong_permutation(
         for (j = 0; j < 16; j=j+1) begin // j = matrix column number
             byte j_byte = j;
             assign bitmatrix_step_output_state[j] = (
-                    (( {16{const_bit_matrix[8'h00 | j_byte]}}) & state_input_store[4'h0]) ^
-                    (( {16{const_bit_matrix[8'h10 | j_byte]}}) & state_input_store[4'h1]) ^
-                    (( {16{const_bit_matrix[8'h20 | j_byte]}}) & state_input_store[4'h2]) ^
-                    (( {16{const_bit_matrix[8'h30 | j_byte]}}) & state_input_store[4'h3]) ^
-                    (( {16{const_bit_matrix[8'h40 | j_byte]}}) & state_input_store[4'h4]) ^
-                    (( {16{const_bit_matrix[8'h50 | j_byte]}}) & state_input_store[4'h5]) ^
-                    (( {16{const_bit_matrix[8'h60 | j_byte]}}) & state_input_store[4'h6]) ^
-                    (( {16{const_bit_matrix[8'h70 | j_byte]}}) & state_input_store[4'h7]) ^
-                    (( {16{const_bit_matrix[8'h80 | j_byte]}}) & state_input_store[4'h8]) ^
-                    (( {16{const_bit_matrix[8'h90 | j_byte]}}) & state_input_store[4'h9]) ^
-                    (( {16{const_bit_matrix[8'hA0 | j_byte]}}) & state_input_store[4'hA]) ^
-                    (( {16{const_bit_matrix[8'hB0 | j_byte]}}) & state_input_store[4'hB]) ^
-                    (( {16{const_bit_matrix[8'hC0 | j_byte]}}) & state_input_store[4'hC]) ^
-                    (( {16{const_bit_matrix[8'hD0 | j_byte]}}) & state_input_store[4'hD]) ^
-                    (( {16{const_bit_matrix[8'hE0 | j_byte]}}) & state_input_store[4'hE]) ^
-                    (( {16{const_bit_matrix[8'hF0 | j_byte]}}) & state_input_store[4'hF])
+                    (( {32{const_bit_matrix[8'h00 | j_byte]}}) & state_input_store[4'h0]) ^
+                    (( {32{const_bit_matrix[8'h10 | j_byte]}}) & state_input_store[4'h1]) ^
+                    (( {32{const_bit_matrix[8'h20 | j_byte]}}) & state_input_store[4'h2]) ^
+                    (( {32{const_bit_matrix[8'h30 | j_byte]}}) & state_input_store[4'h3]) ^
+                    (( {32{const_bit_matrix[8'h40 | j_byte]}}) & state_input_store[4'h4]) ^
+                    (( {32{const_bit_matrix[8'h50 | j_byte]}}) & state_input_store[4'h5]) ^
+                    (( {32{const_bit_matrix[8'h60 | j_byte]}}) & state_input_store[4'h6]) ^
+                    (( {32{const_bit_matrix[8'h70 | j_byte]}}) & state_input_store[4'h7]) ^
+                    (( {32{const_bit_matrix[8'h80 | j_byte]}}) & state_input_store[4'h8]) ^
+                    (( {32{const_bit_matrix[8'h90 | j_byte]}}) & state_input_store[4'h9]) ^
+                    (( {32{const_bit_matrix[8'hA0 | j_byte]}}) & state_input_store[4'hA]) ^
+                    (( {32{const_bit_matrix[8'hB0 | j_byte]}}) & state_input_store[4'hB]) ^
+                    (( {32{const_bit_matrix[8'hC0 | j_byte]}}) & state_input_store[4'hC]) ^
+                    (( {32{const_bit_matrix[8'hD0 | j_byte]}}) & state_input_store[4'hD]) ^
+                    (( {32{const_bit_matrix[8'hE0 | j_byte]}}) & state_input_store[4'hE]) ^
+                    (( {32{const_bit_matrix[8'hF0 | j_byte]}}) & state_input_store[4'hF])
                 );
         end
     endgenerate
+    
 
 
-
-        // // TEMP DEBUG: copy bitmatrix_step_output_state right to the output
-        // for (i = 0; i < 16; i=i+1) begin
-        //     next_state_output <= bitmatrix_step_output_state;
-        // end
+    generate
+        // TEMP DEBUG: copy bitmatrix_step_output_state right to the output
+        // TODO: replace this with the rest of the comb/seq logic to make this work well
+        for (i = 0; i < 16; i=i+1) begin
+            assign next_state_output[i] = bitmatrix_step_output_state[i];
+        end
+    endgenerate
 
 
 
@@ -67,5 +70,12 @@ module eaglesong_permutation(
             assign state_output[i] = next_state_output[i];
         end
     endgenerate
+
+    initial begin
+        $monitor("Time=%d, bitmatrix_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
+            $time,
+            bitmatrix_step_output_state[0], bitmatrix_step_output_state[1], bitmatrix_step_output_state[2],
+            bitmatrix_step_output_state[15]);
+    end
 
 endmodule

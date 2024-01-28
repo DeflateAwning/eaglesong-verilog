@@ -44,6 +44,16 @@ module tb_eaglesong_permutation;
         tb_clk = !tb_clk;
     end // clk_gen
 
+    task init_task;
+        begin
+            // for fun
+            state_input[0] <= 32'h0;
+
+            // main reset
+            start_eval <= 1'b0;
+        end
+    endtask
+
     //----------------------------------------------------------------
     // Main Test Task
     //----------------------------------------------------------------
@@ -53,6 +63,37 @@ module tb_eaglesong_permutation;
     
         // $monitor("Time=%t, bit_index_to_request=%h, requested_bit=%b",
         //     $time, bit_index_to_request, requested_bit);
+        #(CLK_PERIOD*10);
+
+        // set the 'Hello, world!\n' test
+        // state_input = {32'h48656C6C, 32'h6F2C2077, 32'h6F726C64, 32'h00210A06,
+        //         32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000,
+        //         32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000,
+        //         32'h00000000, 32'h00000000}; // TODO: not yet supported by iverilog
+        state_input[0] <= 32'h48656C6C;
+        state_input[1] <= 32'h6F2C2077;
+        state_input[2] <= 32'h6F726C64;
+        state_input[3] <= 32'h00210A06;
+        state_input[4] <= 32'h00000000;
+        state_input[5] <= 32'h00000000;
+        state_input[6] <= 32'h00000000;
+        state_input[7] <= 32'h00000000;
+        state_input[8] <= 32'h00000000;
+        state_input[9] <= 32'h00000000;
+        state_input[10] <= 32'h00000000;
+        state_input[11] <= 32'h00000000;
+        state_input[12] <= 32'h00000000;
+        state_input[13] <= 32'h00000000;
+        state_input[14] <= 32'h00000000;
+        state_input[15] <= 32'h00000000;
+
+        start_eval <= 1'b1; // activate
+
+        #(CLK_PERIOD*2);
+
+        $display("Output state_output[0]=h%h", state_output[0]);
+
+        #(CLK_PERIOD*100);
 
         // #(CLK_PERIOD); // delay one clock
         // bit_index_to_request = 0;

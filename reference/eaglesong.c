@@ -229,7 +229,7 @@ void EaglesongPermutation( uint32_t * state ) {
             #endif
 
             printf("j=%d\n", j);
-            printf("state  : "); print_array(state, 32); printf("\n");
+            printf("state  : "); print_array(state, 16); printf("\n");
             printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
             printf("new_try: "); print_array(new, j+1); printf("\n");
             if (j == 3) exit(10);
