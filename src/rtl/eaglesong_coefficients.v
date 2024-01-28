@@ -1,7 +1,11 @@
+`timescale 1ns/1ps
+
 module eaglesong_coefficients(
         input [6:0] index_to_request, // must be from d0 to d47 inclusive
         output [4:0] requested_coefficient
     );
+    // Outputs the coefficient at a given index.
+    // If the index_to_request>d47, then requested_coefficient=0 (as this is an invalid case)
 
     // Generated with Python:
     /*
@@ -16,65 +20,67 @@ module eaglesong_coefficients(
         In [4]: len(a)
         Out[4]: 48
 
-        In [5]: for idx, val in enumerate(a): print(f"assign coeffs_const[{idx}] = 5'd{val};")
+        In [5]: for idx, val in enumerate(a): print(f"7'd{idx:02d}: requested_coefficient_val = 5'd{val:02d};")
     */
 
-    // TODO: confirm this assert works
-    assert (index_to_request >= 0 && index_to_request <= 47) else $fatal("index_to_request must be from d0 to d47 inclusive");
-
     // 48 coefficients, each 5 bits wide
-    reg [47:0] coeffs_const [4:0];
-    
-    // region assign coeffs_const values
-    assign coeffs_const[0] = 5'd0;
-    assign coeffs_const[1] = 5'd2;
-    assign coeffs_const[2] = 5'd4;
-    assign coeffs_const[3] = 5'd0;
-    assign coeffs_const[4] = 5'd13;
-    assign coeffs_const[5] = 5'd22;
-    assign coeffs_const[6] = 5'd0;
-    assign coeffs_const[7] = 5'd4;
-    assign coeffs_const[8] = 5'd19;
-    assign coeffs_const[9] = 5'd0;
-    assign coeffs_const[10] = 5'd3;
-    assign coeffs_const[11] = 5'd14;
-    assign coeffs_const[12] = 5'd0;
-    assign coeffs_const[13] = 5'd27;
-    assign coeffs_const[14] = 5'd31;
-    assign coeffs_const[15] = 5'd0;
-    assign coeffs_const[16] = 5'd3;
-    assign coeffs_const[17] = 5'd8;
-    assign coeffs_const[18] = 5'd0;
-    assign coeffs_const[19] = 5'd17;
-    assign coeffs_const[20] = 5'd26;
-    assign coeffs_const[21] = 5'd0;
-    assign coeffs_const[22] = 5'd3;
-    assign coeffs_const[23] = 5'd12;
-    assign coeffs_const[24] = 5'd0;
-    assign coeffs_const[25] = 5'd18;
-    assign coeffs_const[26] = 5'd22;
-    assign coeffs_const[27] = 5'd0;
-    assign coeffs_const[28] = 5'd12;
-    assign coeffs_const[29] = 5'd18;
-    assign coeffs_const[30] = 5'd0;
-    assign coeffs_const[31] = 5'd4;
-    assign coeffs_const[32] = 5'd7;
-    assign coeffs_const[33] = 5'd0;
-    assign coeffs_const[34] = 5'd4;
-    assign coeffs_const[35] = 5'd31;
-    assign coeffs_const[36] = 5'd0;
-    assign coeffs_const[37] = 5'd12;
-    assign coeffs_const[38] = 5'd27;
-    assign coeffs_const[39] = 5'd0;
-    assign coeffs_const[40] = 5'd7;
-    assign coeffs_const[41] = 5'd17;
-    assign coeffs_const[42] = 5'd0;
-    assign coeffs_const[43] = 5'd7;
-    assign coeffs_const[44] = 5'd8;
-    assign coeffs_const[45] = 5'd0;
-    assign coeffs_const[46] = 5'd1;
-    assign coeffs_const[47] = 5'd13;
-    // endregion assign coeffs_const values
+    // can't assign to a wire, so create a register
+    reg [4:0] requested_coefficient_val;
 
-    assign requested_coefficient = coeffs_const[index_to_request];
+    always @(index_to_request) begin
+        // TODO: confirm if the case assignments should be '=' or '<='
+        case(index_to_request)
+            7'd00: requested_coefficient_val = 5'd00;
+            7'd01: requested_coefficient_val = 5'd02;
+            7'd02: requested_coefficient_val = 5'd04;
+            7'd03: requested_coefficient_val = 5'd00;
+            7'd04: requested_coefficient_val = 5'd13;
+            7'd05: requested_coefficient_val = 5'd22;
+            7'd06: requested_coefficient_val = 5'd00;
+            7'd07: requested_coefficient_val = 5'd04;
+            7'd08: requested_coefficient_val = 5'd19;
+            7'd09: requested_coefficient_val = 5'd00;
+            7'd10: requested_coefficient_val = 5'd03;
+            7'd11: requested_coefficient_val = 5'd14;
+            7'd12: requested_coefficient_val = 5'd00;
+            7'd13: requested_coefficient_val = 5'd27;
+            7'd14: requested_coefficient_val = 5'd31;
+            7'd15: requested_coefficient_val = 5'd00;
+            7'd16: requested_coefficient_val = 5'd03;
+            7'd17: requested_coefficient_val = 5'd08;
+            7'd18: requested_coefficient_val = 5'd00;
+            7'd19: requested_coefficient_val = 5'd17;
+            7'd20: requested_coefficient_val = 5'd26;
+            7'd21: requested_coefficient_val = 5'd00;
+            7'd22: requested_coefficient_val = 5'd03;
+            7'd23: requested_coefficient_val = 5'd12;
+            7'd24: requested_coefficient_val = 5'd00;
+            7'd25: requested_coefficient_val = 5'd18;
+            7'd26: requested_coefficient_val = 5'd22;
+            7'd27: requested_coefficient_val = 5'd00;
+            7'd28: requested_coefficient_val = 5'd12;
+            7'd29: requested_coefficient_val = 5'd18;
+            7'd30: requested_coefficient_val = 5'd00;
+            7'd31: requested_coefficient_val = 5'd04;
+            7'd32: requested_coefficient_val = 5'd07;
+            7'd33: requested_coefficient_val = 5'd00;
+            7'd34: requested_coefficient_val = 5'd04;
+            7'd35: requested_coefficient_val = 5'd31;
+            7'd36: requested_coefficient_val = 5'd00;
+            7'd37: requested_coefficient_val = 5'd12;
+            7'd38: requested_coefficient_val = 5'd27;
+            7'd39: requested_coefficient_val = 5'd00;
+            7'd40: requested_coefficient_val = 5'd07;
+            7'd41: requested_coefficient_val = 5'd17;
+            7'd42: requested_coefficient_val = 5'd00;
+            7'd43: requested_coefficient_val = 5'd07;
+            7'd44: requested_coefficient_val = 5'd08;
+            7'd45: requested_coefficient_val = 5'd00;
+            7'd46: requested_coefficient_val = 5'd01;
+            7'd47: requested_coefficient_val = 5'd13;
+            default: requested_coefficient_val = 5'd00; // undefined case
+        endcase
+    end
+
+    assign requested_coefficient = requested_coefficient_val;
 endmodule
