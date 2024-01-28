@@ -42,10 +42,12 @@ module tb_eaglesong_bit_matrix;
     // Main Test Task
     //----------------------------------------------------------------
     task main_test_task;
+
+    begin
     
         $monitor("Time=%t, bit_index_to_request=%h, requested_bit=%b",
             $time, bit_index_to_request, requested_bit);
-/*
+
         #(CLK_PERIOD); // delay one clock
         bit_index_to_request = 0;
         if (requested_bit !== 1'b1) begin
@@ -67,17 +69,14 @@ module tb_eaglesong_bit_matrix;
             $error("Assertion failed: bit_index_to_request=255-2 should yield requested_bit=0, but requested_bit=%b", requested_bit);
             tb_error_cnt = tb_error_cnt + 1;
         end
-        */
 
-        // force an error // FIXME: disable
-        begin
-            $error("Forced error for testbench testing.");
-            tb_error_cnt = tb_error_cnt + 1;
-        end
-
-        // Finish simulation after some time
+        // force an error, for confirming that the test best works
         // #(CLK_PERIOD);
-        // $finish; // TODO: confirm if this is good
+        // begin
+        //     $error("Forced error for testbench testing.");
+        //     tb_error_cnt = tb_error_cnt + 1;
+        // end
+    end
     endtask
 
     //----------------------------------------------------------------
