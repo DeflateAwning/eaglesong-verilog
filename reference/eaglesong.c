@@ -209,29 +209,30 @@ void EaglesongPermutation( uint32_t * state ) {
             // = 0 ^ (1 ^ 1) = 0 ^ 0 = 0 ||VS|| = 0 ^ (1) ^ 1 = 0
             // new[j] = 0;
             new[j] = (
-                        (bit_matrix[0x00 + j] * 0xffffffff) & state[0] ^
-                        (bit_matrix[0x10 + j] * 0xffffffff) & state[1] ^
-                        (bit_matrix[0x20 + j] * 0xffffffff) & state[2] ^
-                        (bit_matrix[0x30 + j] * 0xffffffff) & state[3] ^
-                        (bit_matrix[0x40 + j] * 0xffffffff) & state[4] ^
-                        (bit_matrix[0x50 + j] * 0xffffffff) & state[5] ^
-                        (bit_matrix[0x60 + j] * 0xffffffff) & state[6] ^
-                        (bit_matrix[0x70 + j] * 0xffffffff) & state[7] ^
-                        (bit_matrix[0x80 + j] * 0xffffffff) & state[8] ^
-                        (bit_matrix[0x90 + j] * 0xffffffff) & state[9] ^
-                        (bit_matrix[0xA0 + j] * 0xffffffff) & state[10] ^
-                        (bit_matrix[0xB0 + j] * 0xffffffff) & state[11] ^
-                        (bit_matrix[0xC0 + j] * 0xffffffff) & state[12] ^
-                        (bit_matrix[0xD0 + j] * 0xffffffff) & state[13] ^
-                        (bit_matrix[0xE0 + j] * 0xffffffff) & state[14] ^
-                        (bit_matrix[0xF0 + j] * 0xffffffff) & state[15]
+                        (bit_matrix[0x00 | j] * 0xffffffff) & state[0] ^
+                        (bit_matrix[0x10 | j] * 0xffffffff) & state[1] ^
+                        (bit_matrix[0x20 | j] * 0xffffffff) & state[2] ^
+                        (bit_matrix[0x30 | j] * 0xffffffff) & state[3] ^
+                        (bit_matrix[0x40 | j] * 0xffffffff) & state[4] ^
+                        (bit_matrix[0x50 | j] * 0xffffffff) & state[5] ^
+                        (bit_matrix[0x60 | j] * 0xffffffff) & state[6] ^
+                        (bit_matrix[0x70 | j] * 0xffffffff) & state[7] ^
+                        (bit_matrix[0x80 | j] * 0xffffffff) & state[8] ^
+                        (bit_matrix[0x90 | j] * 0xffffffff) & state[9] ^
+                        (bit_matrix[0xA0 | j] * 0xffffffff) & state[10] ^
+                        (bit_matrix[0xB0 | j] * 0xffffffff) & state[11] ^
+                        (bit_matrix[0xC0 | j] * 0xffffffff) & state[12] ^
+                        (bit_matrix[0xD0 | j] * 0xffffffff) & state[13] ^
+                        (bit_matrix[0xE0 | j] * 0xffffffff) & state[14] ^
+                        (bit_matrix[0xF0 | j] * 0xffffffff) & state[15]
                     );
             #endif
 
-            // printf("j=%d\n", j);
-            // printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
-            // printf("new_try: "); print_array(new, j+1); printf("\n");
-            // if (j == 3) exit(10);
+            printf("j=%d\n", j);
+            printf("state  : "); print_array(state, 32); printf("\n");
+            printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
+            printf("new_try: "); print_array(new, j+1); printf("\n");
+            if (j == 3) exit(10);
             
         }
         for( j = 0 ; j < 16 ; ++j ) {

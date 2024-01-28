@@ -23,7 +23,7 @@ vvp ./tb_eaglesong_coefficients.iv_sim.vvp
 echo "=== Done tb_eaglesong_coefficients"
 
 echo "=== Building tb_eaglesong_permutation"
-iverilog $IVERILOG_ARGS -o ./tb_eaglesong_permutation.iv_sim.vvp ./rtl/eaglesong_permutation.v ./tb/tb_eaglesong_permutation.v
+iverilog $IVERILOG_ARGS -o ./tb_eaglesong_permutation.iv_sim.vvp ./rtl/eaglesong_permutation.sv ./tb/tb_eaglesong_permutation.sv
 echo "iverilog exit code: $?"
 echo "=== Running tb_eaglesong_permutation"
 vvp ./tb_eaglesong_permutation.iv_sim.vvp
