@@ -204,7 +204,7 @@ void EaglesongPermutation( uint32_t * state ) {
             }
             #endif
 
-            ////// TRIAL 2 ///////
+            ////// VERILOG MODEL WAY ///////
             #if 1
             // = 0 ^ (1 ^ 1) = 0 ^ 0 = 0 ||VS|| = 0 ^ (1) ^ 1 = 0
             // new[j] = 0;
@@ -239,7 +239,6 @@ void EaglesongPermutation( uint32_t * state ) {
             state[j] = new[j];
         }
 
-
         printf("between bit_matrix and circulant stage\n");
         printf("state  : "); print_array(state, 16); printf("\n");
 
@@ -257,17 +256,32 @@ void EaglesongPermutation( uint32_t * state ) {
         printf("between injection stage and addrotadd stage\n");
         printf("state  : "); print_array(state, 16); printf("\n");
 
-        // addition / rotation / addition
+        // addition / rotation / addition ("addrotadd")
+        #if 0
+        // REFERENCE WAY
         for( j = 0 ; j < 16 ; j = j + 2 ) {
             state[j] = state[j] + state[j+1];
             state[j] = (state[j] << 8) ^ (state[j] >> 24);
             state[j+1] = (state[j+1] << 24) ^ (state[j+1] >> 8);
             state[j+1] = state[j] + state[j+1];
         }
+        #endif
 
+        #if 1
+        // VERILOG MODEL WAY
+        uint32_t addrotadd_step_intermed1[8];
+        for( j = 0 ; j < 16 ; j += 2 ) {
+            addrotadd_step_intermed1[j >> 1] = state[j] + state[j+1];
+            new[j] = (addrotadd_step_intermed1[j >> 1] << 8) ^ (addrotadd_step_intermed1[j >> 1] >> 24);
+            new[j+1] = new[j] + ((state[j+1] << 24) ^ (state[j+1] >> 8));
+        }
+        for( j = 0 ; j < 16 ; j++ ) {
+            state[j] = new[j];
+        }
+        #endif
 
         printf("=== END OF ROUND #%d ===\n", i);
-        printf("state  : "); print_array(state, 16); printf("\n");
+        printf("state (after addrotadd)  : "); print_array(state, 16); printf("\n");
         exit(1); // DEBUG
     }
 }

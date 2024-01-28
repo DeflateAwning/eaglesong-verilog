@@ -18,6 +18,8 @@ module eaglesong_permutation(
     wire [31:0] bitmatrix_step_output_state [15:0]; // TODO: decide wire or reg
     reg [31:0] circulant_step_output_state [15:0]; // TODO: decide wire or reg
     reg [31:0] injection_step_output_state [15:0];
+    reg [31:0] addrotadd_step_output_state [15:0];
+    wire [31:0] addrotadd_step_intermed1 [7:0];
     reg [31:0] next_state_output [15:0];
 
     reg [255:0] const_bit_matrix = 256'h47d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
@@ -222,7 +224,15 @@ module eaglesong_permutation(
             byte j_byte = j;
             assign injection_step_output_state[j] = circulant_step_output_state[j] ^
                                                         const_injections[(round_num_store << 4) | j_byte];
-            $display("Injection index: d%d\n", (round_num_store << 4) | j_byte);
+        end
+    endgenerate
+
+    // addrotadd stage
+    generate
+        for (j = 0; j < 16; j+=2) begin
+            assign addrotadd_step_intermed1[j >> 1] = injection_step_output_state[j] + injection_step_output_state[j+1];
+            assign addrotadd_step_output_state[j] = (addrotadd_step_intermed1[j >> 1] << 8) ^ (addrotadd_step_intermed1[j >> 1] >> 24);
+            assign addrotadd_step_output_state[j+1] = addrotadd_step_output_state[j] + ((injection_step_output_state[j+1] << 24) ^ (injection_step_output_state[j+1] >> 8));
         end
     endgenerate
 
@@ -230,7 +240,7 @@ module eaglesong_permutation(
         // TEMP DEBUG: copy bitmatrix_step_output_state right to the output
         // TODO: replace this with the rest of the comb/seq logic to make this work well
         for (i = 0; i < 16; i=i+1) begin
-            assign next_state_output[i] = injection_step_output_state[i];
+            assign next_state_output[i] = addrotadd_step_output_state[i];
         end
     endgenerate
 
@@ -259,6 +269,11 @@ module eaglesong_permutation(
             $time,
             injection_step_output_state[0], injection_step_output_state[1], injection_step_output_state[2],
             injection_step_output_state[15]);
+        
+        $monitor("Time=%d, addrotadd_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
+            $time,
+            addrotadd_step_output_state[0], addrotadd_step_output_state[1], addrotadd_step_output_state[2],
+            addrotadd_step_output_state[15]);
     end
 
 endmodule
