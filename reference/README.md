@@ -320,19 +320,28 @@ The Eaglesong hash function is obtained by taking the sponge code and instantiat
 This RFC is supplemented by two reference implementations, one in [C](eaglesong.c) and one in [python](eaglesong.py). Attached is also a wrapper ([C](hash.c) and [python](hash.py)) for computing the Eaglesong hash of a string read from stdin.
 
 To compile and run the C program:
-```
-$> gcc -o hash eaglesong.c hash.c
-$> ./hash
+```bash
+$> gcc -o eaglesong_hash_model.exe eaglesong.c hash.c
+$> ./eaglesong_hash_model.exe
  > Hello, world!
  > [Ctrl-D]
  > 64867e2441d162615dc2430b6bcb4d3f4b95e4d0db529fca1eece73c077d72d6
 ```
 
 To run the python program:
-```
-$> python hash.py
+```bash
+$> python3 hash.py
  > Hello, world!
  > [Ctrl-D]
- > 64867e2441d162615dc2430b6bcb4d3f4b95e4d0db529fca1eece73c077d72d6
-```
+ > Input: b'Hello, world!\n'
+ > Hash:  b'64867e2441d162615dc2430b6bcb4d3f4b95e4d0db529fca1eece73c077d72d6'
 
+$> echo Hello world | python3 hash.py
+ > Input: b'Hello world\n'
+ > Hash:  b'64867e2441d162615dc2430b6bcb4d3f4b95e4d0db529fca1eece73c077d72d6'
+
+# no trailing newline
+$> echo -n Hello world | python3 hash.py
+ > Input: b'Hello world'
+ > Hash:  b'b194a2f125bebee7e015df305a589d3c716655cf164c72eec932ae93dae58da0'
+```
