@@ -146,10 +146,34 @@ uint16_t bit_array_to_int16(uint32_t * bit_array, int16_t start, int16_t end) {
     }
 }
 
+uint16_t reverse_bits_16(uint16_t in) {
+    uint16_t out;
+    for (int i = 0; i < 16; i++) {
+        if (out & (1<<i)) {
+            out |= (1 << (15-i));
+        }
+    }
+}
+
+uint32_t reverse_bits_32(uint32_t in) {
+    uint32_t out;
+    for (int i = 0; i < 32; i++) {
+        if (out & (1<<i)) {
+            out |= (1 << (31-i));
+        }
+    }
+}
+
+void print_array(uint32_t * array, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++)
+        printf("0x%08X ", array[i]);
+}
+
 void EaglesongPermutation( uint32_t * state ) {
     // Arg state: uint32_t state[16];
 
     uint32_t new[16];
+    uint32_t new_correct[16];
     int i, j, k;
 
     //PrintState(state);
@@ -157,21 +181,57 @@ void EaglesongPermutation( uint32_t * state ) {
     for( i = 0 ; i < num_rounds ; ++i ) {
         // bit matrix
         for( j = 0 ; j < 16 ; ++j ) { // j is matrix column
+            ////// FILL DEBUG COMPARISON VARIABLE ///////
+            new_correct[j] = 0;
+            for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
+                new_correct[j] = new_correct[j] ^ (bit_matrix[k*16 + j] * state[k]);
+            }
+
             ////// REFERENCE WAY ///////
-            // new[j] = 0;
-            // for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
-            //     new[j] = new[j] ^ (bit_matrix[k*16 + j] * state[k]);
-            // }
+            #if 0
+            new[j] = 0;
+            for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
+                new[j] = new[j] ^ (bit_matrix[k*16 + j] * state[k]);
+            }
+            #endif
 
             ////// TRIAL 1 ///////
+            #if 0
             new[j] = 0;
             for( k = 0 ; k < 16 ; ++k ) { // k is matrix row and state index
                 if (bit_matrix[k*16 + j])
                     new[j] = new[j] ^ state[k];
             }
+            #endif
 
             ////// TRIAL 2 ///////
-            // new[j] = new[j] ^ x;
+            #if 1
+            // = 0 ^ (1 ^ 1) = 0 ^ 0 = 0 ||VS|| = 0 ^ (1) ^ 1 = 0
+            // new[j] = 0;
+            new[j] = (
+                        (bit_matrix[0x00 + j] * 0xffffffff) & state[0] ^
+                        (bit_matrix[0x10 + j] * 0xffffffff) & state[1] ^
+                        (bit_matrix[0x20 + j] * 0xffffffff) & state[2] ^
+                        (bit_matrix[0x30 + j] * 0xffffffff) & state[3] ^
+                        (bit_matrix[0x40 + j] * 0xffffffff) & state[4] ^
+                        (bit_matrix[0x50 + j] * 0xffffffff) & state[5] ^
+                        (bit_matrix[0x60 + j] * 0xffffffff) & state[6] ^
+                        (bit_matrix[0x70 + j] * 0xffffffff) & state[7] ^
+                        (bit_matrix[0x80 + j] * 0xffffffff) & state[8] ^
+                        (bit_matrix[0x90 + j] * 0xffffffff) & state[9] ^
+                        (bit_matrix[0xA0 + j] * 0xffffffff) & state[10] ^
+                        (bit_matrix[0xB0 + j] * 0xffffffff) & state[11] ^
+                        (bit_matrix[0xC0 + j] * 0xffffffff) & state[12] ^
+                        (bit_matrix[0xD0 + j] * 0xffffffff) & state[13] ^
+                        (bit_matrix[0xE0 + j] * 0xffffffff) & state[14] ^
+                        (bit_matrix[0xF0 + j] * 0xffffffff) & state[15]
+                    );
+            #endif
+
+            // printf("j=%d\n", j);
+            // printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
+            // printf("new_try: "); print_array(new, j+1); printf("\n");
+            // if (j == 3) exit(10);
             
         }
         for( j = 0 ; j < 16 ; ++j ) {
