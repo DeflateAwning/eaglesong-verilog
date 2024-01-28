@@ -15,7 +15,7 @@ module tb_eaglesong_coefficients;
     //----------------------------------------------------------------
     // Register and Wire declarations.
     //----------------------------------------------------------------
-    reg [6:0] index_to_request; // must be from d0 to d47 inclusive
+    reg [5:0] index_to_request; // must be from d0 to d47 inclusive
     wire [4:0] requested_coefficient;
     reg tb_clk = 0;
     reg [7:0] tb_error_cnt = 0;

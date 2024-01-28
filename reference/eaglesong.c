@@ -228,21 +228,27 @@ void EaglesongPermutation( uint32_t * state ) {
                     );
             #endif
 
-            printf("j=%d\n", j);
-            printf("state  : "); print_array(state, 16); printf("\n");
-            printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
-            printf("new_try: "); print_array(new, j+1); printf("\n");
-            if (j == 3) exit(10);
+            // printf("bit_matrix stage: j=%d\n", j);
+            // printf("state  : "); print_array(state, 16); printf("\n");
+            // printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
+            // printf("new_try: "); print_array(new, j+1); printf("\n");
+            // if (j == 3) exit(10);
             
         }
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = new[j];
         }
 
+
+        printf("between bit_matrix and circulant stage\n");
+        printf("state  : "); print_array(state, 16); printf("\n");
+
         // circulant multiplication
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j]  ^  (state[j] << coefficients[3*j+1]) ^ (state[j] >> (32-coefficients[3*j+1]))  ^  (state[j] << coefficients[3*j+2]) ^ (state[j] >> (32-coefficients[3*j+2]));
         }
+        printf("between circulant stage and constants injection stage\n");
+        printf("state  : "); print_array(state, 16); printf("\n");
 
         // constants injection
         for( j = 0 ; j < 16 ; ++j ) {
@@ -256,6 +262,11 @@ void EaglesongPermutation( uint32_t * state ) {
             state[j+1] = (state[j+1] << 24) ^ (state[j+1] >> 8);
             state[j+1] = state[j] + state[j+1];
         }
+
+
+        printf("=== END OF ROUND #%d ===\n", i);
+        printf("state  : "); print_array(state, 16); printf("\n");
+        break; // debugging
     }
 }
 
