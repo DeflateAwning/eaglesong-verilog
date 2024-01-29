@@ -3,17 +3,18 @@
 module eaglesong_permutation(
         input [31:0] state_input [15:0],
         input [5:0] round_num, // must be 0 <= round_num <= 42
-        input start_eval,
 
-        output [31:0] state_output [15:0],
-        output eval_output_ready
+        output [31:0] state_output [15:0]
     );
+
+    // calculates one instance of what's inside the permutation loop
 
     genvar i;
     genvar j;
 
-    reg [31:0] state_input_store [15:0];
-    reg [5:0] round_num_store;
+    // if we turn this pipelined, these stores can be registers
+    wire [31:0] state_input_store [15:0];
+    wire [5:0] round_num_store;
 
     wire [31:0] bitmatrix_step_output_state [15:0]; // TODO: decide wire or reg
     reg [31:0] circulant_step_output_state [15:0]; // TODO: decide wire or reg
@@ -169,15 +170,18 @@ module eaglesong_permutation(
     assign const_injections[680] = 32'h59AEE281; assign const_injections[681] = 32'h449CB799; assign const_injections[682] = 32'hE01F5605; assign const_injections[683] = 32'hED0E085E; assign const_injections[684] = 32'hC9A1A3B4; assign const_injections[685] = 32'hAAC481B1; assign const_injections[686] = 32'hC935C39C; assign const_injections[687] = 32'hB7D8CE7F;
 
     
-    // store the input to a register
+    // assign inputs to internal wire/reg (in the future, store the input to a register)
     generate // TODO: replace with single assignment statement, when supported by iverilog
         for (i = 0; i < 16; i=i+1) begin
-            always_ff @(posedge start_eval) begin
-                state_input_store[i] <= state_input[i];
-                round_num_store <= round_num;
-            end
+            // always_ff @(posedge start_eval) begin
+            //     state_input_store[i] <= state_input[i];
+            //     round_num_store <= round_num;
+            // end
+
+            assign state_input_store[i] = state_input[i];
         end
     endgenerate
+    assign round_num_store = round_num;
 
     // assign the bit_matrix stage (combinationally)
     generate

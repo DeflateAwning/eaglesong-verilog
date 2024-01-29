@@ -17,10 +17,9 @@ module tb_eaglesong_permutation;
     //----------------------------------------------------------------
     reg [31:0] state_input [15:0];
     reg [5:0] round_num;
-    reg start_eval;
+    // reg start_eval;
 
     wire [31:0] state_output [15:0];
-    wire eval_output_ready;
 
     reg tb_clk = 0;
     reg [7:0] tb_error_cnt = 0;
@@ -29,13 +28,12 @@ module tb_eaglesong_permutation;
     // Device Under Test.
     //----------------------------------------------------------------
     eaglesong_permutation dut (
-        .state_input(state_input),
-        .round_num(round_num),
-        .start_eval(start_eval),
+            .state_input(state_input),
+            .round_num(round_num),
+            // .start_eval(start_eval),
 
-        .state_output(state_output),
-        .eval_output_ready(eval_output_ready)
-    );
+            .state_output(state_output)
+        );
 
     //----------------------------------------------------------------
     // clk_gen
@@ -53,7 +51,7 @@ module tb_eaglesong_permutation;
             state_input[0] <= 32'h0;
 
             // main reset
-            start_eval <= 1'b0;
+            // start_eval <= 1'b0;
 
             // other good reset
             round_num <= 6'h0;
@@ -94,20 +92,34 @@ module tb_eaglesong_permutation;
         state_input[15] <= 32'h00000000;
         round_num <= 6'h0;
 
-        start_eval <= 1'b1; // activate
+        #(CLK_PERIOD);
 
-        #(CLK_PERIOD*2);
-
-        $display("Output state_output[0]=h%h", state_output[0]);
+        // PYTHON: a = "0xC9E25AFA 0x6D5BEC80 0x19CEFBAB 0x3227B4C4 0x0FF9A2DF 0xD2C2E889 0x69EBBD09 0x99AED17F 0x7AACD046 0xB58813C8 0x80832F1E 0x27473E60 0xB7F00AE4 0x74B136CB 0xD05A7F42 0x08855BFF".replace('0x', '').split(' ')
+        // PYTHON: for idx, val in enumerate(a): print(f"(state_output[{idx}] != 32'h{val}) ||")
+        if ((state_output[0] != 32'hC9E25AFA) ||
+                    (state_output[1] != 32'h6D5BEC80) ||
+                    (state_output[2] != 32'h19CEFBAB) ||
+                    (state_output[3] != 32'h3227B4C4) ||
+                    (state_output[4] != 32'h0FF9A2DF) ||
+                    (state_output[5] != 32'hD2C2E889) ||
+                    (state_output[6] != 32'h69EBBD09) ||
+                    (state_output[7] != 32'h99AED17F) ||
+                    (state_output[8] != 32'h7AACD046) ||
+                    (state_output[9] != 32'hB58813C8) ||
+                    (state_output[10] != 32'h80832F1E) ||
+                    (state_output[11] != 32'h27473E60) ||
+                    (state_output[12] != 32'hB7F00AE4) ||
+                    (state_output[13] != 32'h74B136CB) ||
+                    (state_output[14] != 32'hD05A7F42) ||
+                    (state_output[15] != 32'h08855BFF)
+                ) begin
+            $error("Assertion failed: state_output does not match expected value (C9E25AFA test).");
+            tb_error_cnt = tb_error_cnt + 1;
+        end
 
         #(CLK_PERIOD*100);
 
-        // #(CLK_PERIOD); // delay one clock
-        // bit_index_to_request = 0;
-        // if (requested_bit !== 1'b1) begin
-        //     $error("Assertion failed: bit_index_to_request=0 should yield requested_bit=1, but requested_bit=%b", requested_bit);
-        //     tb_error_cnt = tb_error_cnt + 1;
-        // end
+        // TODO: add more test cases, including different round numbers
 
         // force an error, for confirming that the test best works
         // #(CLK_PERIOD);
