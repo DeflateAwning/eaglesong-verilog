@@ -235,16 +235,11 @@ module eaglesong_permutation(
     endgenerate
 
     // injection constants stage
-    // assign round_num_store_left_four = {round_num_store[5:0], 4'b0000}; // = round_num_store << 4
-    // assign round_num_store_left_four = round_num_store << 4; // = round_num_store << 4
     generate
         for (j = 0; j < 16; j++) begin
             assign const_inj_idx[j] = {round_num_store[5:0], j[3:0]};
-            byte j_byte = j;
-            //int const_inj_idx = round_num_store_left_four + j_byte; // TODO: ADD and OR do the same here; consider storing this in a wire array
             assign injection_step_output_state[j] = circulant_step_output_state[j] ^
-                                                        const_injections[(round_num_store << 4) | j_byte];
-                                                        // const_injections[const_inj_idx[j]];
+                                                        const_injections[(round_num_store << 4) | j];
         end
     endgenerate
 
