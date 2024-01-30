@@ -15,7 +15,7 @@ module eaglesong_bit_matrix(
             print(hex(int(trev, 2))
         ```
     */
-    reg [255:0] bit_matrix_const = 256'h47d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
+    reg [255:0] bit_matrix_const = 256'hc7d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
 
     assign requested_bit = bit_matrix_const[bit_index_to_request];
 

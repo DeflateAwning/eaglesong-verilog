@@ -28,3 +28,10 @@ echo "iverilog exit code: $?"
 echo "=== Running tb_eaglesong_permutation"
 vvp ./tb_eaglesong_permutation.iv_sim.vvp
 echo "=== Done tb_eaglesong_permutation"
+
+echo "=== Building tb_eaglesong_all_permutations"
+iverilog $IVERILOG_ARGS -o ./tb_eaglesong_all_permutations.iv_sim.vvp ./rtl/eaglesong_all_permutations.sv ./rtl/eaglesong_permutation.sv ./tb/tb_eaglesong_all_permutations.sv
+echo "iverilog exit code: $?"
+echo "=== Running tb_eaglesong_all_permutations"
+vvp ./tb_eaglesong_all_permutations.iv_sim.vvp
+echo "=== Done tb_eaglesong_all_permutations"

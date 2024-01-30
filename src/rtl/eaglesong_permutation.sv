@@ -16,20 +16,32 @@ module eaglesong_permutation(
     wire [31:0] state_input_store [15:0];
     wire [5:0] round_num_store;
 
-    wire [31:0] bitmatrix_step_output_state [15:0]; // TODO: decide wire or reg
-    reg [31:0] circulant_step_output_state [15:0]; // TODO: decide wire or reg
-    reg [31:0] injection_step_output_state [15:0];
-    reg [31:0] addrotadd_step_output_state [15:0];
+    wire [31:0] bitmatrix_step_output_state [15:0];
+    wire [31:0] circulant_step_output_state [15:0];
+    wire [31:0] injection_step_output_state [15:0];
+    wire [31:0] addrotadd_step_output_state [15:0];
     wire [31:0] addrotadd_step_intermed1 [7:0];
-    reg [31:0] next_state_output [15:0];
+    wire [31:0] next_state_output [15:0];
 
-    reg [255:0] const_bit_matrix = 256'h47d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
+
+    // const_bit_matrix generated with Python:
+        // a = <paste in the bit_matrix[] array from the C code as list> # // Source: https://github.com/nervosnetwork/rfcs/blob/dff5235616e5c7aec706326494dce1c54163c4be/rfcs/0010-eaglesong/eaglesong.c#L4
+        // arev = reversed(a)
+        // trev = ''
+        // for i in arev: trev += str(i)
+        // print(hex(int(trev, 2)))
+    reg [255:0] const_bit_matrix = 256'hc7d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
     reg [4:0] const_coefficients [47:0];
     reg [31:0] const_injections [687:0];
+
+    // wire [9:0] round_num_store_left_four;
+    wire [9:0] const_inj_idx [15:0];
 
     // initialize the const_coefficients array register
     // Python: a = [0, 2, 4, 0, 13, 22, 0, 4, 19, 0, 3, 14, 0, 27, 31, 0, 3, 8, 0, 17, 26, 0, 3, 12, 0, 18, 22, 0, 12, 18, 0, 4, 7, 0, 4, 31, 0, 12, 27, 0, 7, 17, 0, 7, 8, 0, 1, 13]
     // Python: for idx, val in enumerate(a): print(f"const_coefficients[6'd{idx:02d}] = 5'd{val:02d};")
+    // In [2]: max(a) == 31 # requires 5 bits
+    // In [4]: len(a) == 48
     assign const_coefficients[6'd00] = 5'd00;
     assign const_coefficients[6'd01] = 5'd02;
     assign const_coefficients[6'd02] = 5'd04;
@@ -223,11 +235,16 @@ module eaglesong_permutation(
     endgenerate
 
     // injection constants stage
+    // assign round_num_store_left_four = {round_num_store[5:0], 4'b0000}; // = round_num_store << 4
+    // assign round_num_store_left_four = round_num_store << 4; // = round_num_store << 4
     generate
         for (j = 0; j < 16; j++) begin
+            assign const_inj_idx[j] = {round_num_store[5:0], j[3:0]};
             byte j_byte = j;
+            //int const_inj_idx = round_num_store_left_four + j_byte; // TODO: ADD and OR do the same here; consider storing this in a wire array
             assign injection_step_output_state[j] = circulant_step_output_state[j] ^
                                                         const_injections[(round_num_store << 4) | j_byte];
+                                                        // const_injections[const_inj_idx[j]];
         end
     endgenerate
 
@@ -258,26 +275,36 @@ module eaglesong_permutation(
     endgenerate
 
     initial begin
-        $monitor("Time=%d, bitmatrix_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
-            $time,
+        $monitor("Time=%d, round_num=%d,\nbitmatrix_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ncirculant_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ninjection_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\naddrotadd_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
+            $time, round_num_store,
             bitmatrix_step_output_state[0], bitmatrix_step_output_state[1], bitmatrix_step_output_state[2],
-            bitmatrix_step_output_state[15]);
+            bitmatrix_step_output_state[3], bitmatrix_step_output_state[4], bitmatrix_step_output_state[5],
+            bitmatrix_step_output_state[6], bitmatrix_step_output_state[7], bitmatrix_step_output_state[8],
+            bitmatrix_step_output_state[9], bitmatrix_step_output_state[10], bitmatrix_step_output_state[11],
+            bitmatrix_step_output_state[12], bitmatrix_step_output_state[13], bitmatrix_step_output_state[14],
+            bitmatrix_step_output_state[15],
 
-        
-        $monitor("Time=%d, circulant_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
-            $time,
             circulant_step_output_state[0], circulant_step_output_state[1], circulant_step_output_state[2],
-            circulant_step_output_state[15]);
+            circulant_step_output_state[3], circulant_step_output_state[4], circulant_step_output_state[5],
+            circulant_step_output_state[6], circulant_step_output_state[7], circulant_step_output_state[8],
+            circulant_step_output_state[9], circulant_step_output_state[10], circulant_step_output_state[11],
+            circulant_step_output_state[12], circulant_step_output_state[13], circulant_step_output_state[14],
+            circulant_step_output_state[15],
 
-        $monitor("Time=%d, injection_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
-            $time,
             injection_step_output_state[0], injection_step_output_state[1], injection_step_output_state[2],
-            injection_step_output_state[15]);
-        
-        $monitor("Time=%d, addrotadd_step_output_state[0]=h%h, [1]=h%h, [2]=h%h, ..., [15]=h%h",
-            $time,
+            injection_step_output_state[3], injection_step_output_state[4], injection_step_output_state[5],
+            injection_step_output_state[6], injection_step_output_state[7], injection_step_output_state[8],
+            injection_step_output_state[9], injection_step_output_state[10], injection_step_output_state[11],
+            injection_step_output_state[12], injection_step_output_state[13], injection_step_output_state[14],
+            injection_step_output_state[15],
+
             addrotadd_step_output_state[0], addrotadd_step_output_state[1], addrotadd_step_output_state[2],
-            addrotadd_step_output_state[15]);
+            addrotadd_step_output_state[3], addrotadd_step_output_state[4], addrotadd_step_output_state[5],
+            addrotadd_step_output_state[6], addrotadd_step_output_state[7], addrotadd_step_output_state[8],
+            addrotadd_step_output_state[9], addrotadd_step_output_state[10], addrotadd_step_output_state[11],
+            addrotadd_step_output_state[12], addrotadd_step_output_state[13], addrotadd_step_output_state[14],
+            addrotadd_step_output_state[15]
+        );
     end
 
 endmodule

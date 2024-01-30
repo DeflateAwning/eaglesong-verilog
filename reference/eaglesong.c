@@ -166,8 +166,11 @@ uint32_t reverse_bits_32(uint32_t in) {
 
 void print_array(uint32_t * array, uint16_t len) {
     for (uint16_t i = 0; i < len; i++)
-        printf("0x%08X ", array[i]);
+        printf("%08X ", array[i]);
 }
+
+
+int EaglesongPermutation_call_num = 0;
 
 void EaglesongPermutation( uint32_t * state ) {
     // Arg state: uint32_t state[16];
@@ -176,9 +179,14 @@ void EaglesongPermutation( uint32_t * state ) {
     uint32_t new_correct[16];
     int i, j, k;
 
+    printf("\n\n========== ENTERING EaglesongPermutation, count=%d ==============\n\n\n", EaglesongPermutation_call_num++);
+
     //PrintState(state);
 
     for( i = 0 ; i < num_rounds ; ++i ) {
+        // printf("start of round:\n    ");
+        // print_array(state, 16); printf("\n");
+
         // bit matrix
         for( j = 0 ; j < 16 ; ++j ) { // j is matrix column
             ////// FILL DEBUG COMPARISON VARIABLE ///////
@@ -229,7 +237,7 @@ void EaglesongPermutation( uint32_t * state ) {
             #endif
 
             // printf("bit_matrix stage: j=%d\n", j);
-            // printf("state  : "); print_array(state, 16); printf("\n");
+            // print_array(state, 16); printf("\n");
             // printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
             // printf("new_try: "); print_array(new, j+1); printf("\n");
             // if (j == 3) exit(10);
@@ -239,22 +247,22 @@ void EaglesongPermutation( uint32_t * state ) {
             state[j] = new[j];
         }
 
-        printf("between bit_matrix and circulant stage\n");
-        printf("state  : "); print_array(state, 16); printf("\n");
+        printf("between bit_matrix and circulant stage:\n    ");
+        print_array(state, 16); printf("\n");
 
         // circulant multiplication
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j]  ^  (state[j] << coefficients[3*j+1]) ^ (state[j] >> (32-coefficients[3*j+1]))  ^  (state[j] << coefficients[3*j+2]) ^ (state[j] >> (32-coefficients[3*j+2]));
         }
-        printf("between circulant stage and constants injection stage\n");
-        printf("state  : "); print_array(state, 16); printf("\n");
+        printf("between circulant stage and constants injection stage:\n    ");
+        print_array(state, 16); printf("\n");
 
         // constants injection
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j] ^ injection_constants[i*16+j];
         }
-        printf("between injection stage and addrotadd stage\n");
-        printf("state  : "); print_array(state, 16); printf("\n");
+        printf("between injection stage and addrotadd stage:\n    ");
+        print_array(state, 16); printf("\n");
 
         // addition / rotation / addition ("addrotadd")
         #if 0
@@ -280,10 +288,12 @@ void EaglesongPermutation( uint32_t * state ) {
         }
         #endif
 
+        printf("after addrotadd stage:\n    ");
+        print_array(state, 16); printf("\n");
         printf("=== END OF ROUND #%d ===\n", i);
-        printf("state (after addrotadd)  : "); print_array(state, 16); printf("\n");
-        exit(1); // DEBUG
+        // exit(1); // DEBUG
     }
+    exit(1);
 }
 
 void EaglesongSponge( unsigned char * output, unsigned int output_length, const unsigned char * input, unsigned int input_length, unsigned char delimiter ) {
@@ -312,6 +322,9 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
         }
         EaglesongPermutation(state);
     }
+
+    printf("\n\n==================== DONE ABSORBING, STARTING SQUEEZING ====================n\n\n");
+
 
     // squeezing
     for( i = 0 ; i < output_length/(rate/8) ; ++i ) {
