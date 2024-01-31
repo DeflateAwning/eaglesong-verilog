@@ -107,9 +107,11 @@ uint32_t injection_constants[] = { 0x6e9e40ae ,  0x71927c02 ,  0x9a13d3b1 ,  0xd
 0x71369315 ,  0x796e6a66 ,  0x3a7ec708 ,  0xb05175c8 ,  0xe02b74e7 ,  0xeb377ad3 ,  0x6c8c1f54 ,  0xb980c374 ,
 0x59aee281 ,  0x449cb799 ,  0xe01f5605 ,  0xed0e085e ,  0xc9a1a3b4 ,  0xaac481b1 ,  0xc935c39c ,  0xb7d8ce7f };
 
-int num_rounds = 43;
-int capacity = 256;
-int rate = 256;
+const int num_rounds = 43;
+const int capacity = 256;
+const int rate = 256;
+const int config_output_length = 32;
+const uint8_t config_delimiter = 0x06;
 
 void PrintState( uint32_t * state ) {
     int i;
@@ -293,10 +295,10 @@ void EaglesongPermutation( uint32_t * state ) {
         printf("=== END OF ROUND #%d ===\n", i);
         // exit(1); // DEBUG
     }
-    exit(1);
+    // exit(1); // DEBUG
 }
 
-void EaglesongSponge( unsigned char * output, unsigned int output_length, const unsigned char * input, unsigned int input_length, unsigned char delimiter ) {
+void EaglesongSponge( unsigned char * output, unsigned int output_length, const unsigned char * input, unsigned int input_length, uint8_t delimiter ) {
     uint32_t state[16];
     int i, j, k;
     uint32_t integer;
@@ -307,18 +309,22 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
     }
 
     // absorbing
-    for( i = 0 ; i < ((input_length+1)*8+rate-1) / rate ; ++i ) {
-        for( j = 0 ; j < rate/32 ; ++j ) {
+    // assume max length is 32 bytes (256 bits)
+    for( i = 0 ; i < ((input_length+1)*8+rate-1) / rate ; ++i ) { // iteration thru i will happen on clocks
+        for( j = 0 ; j < rate/32 ; ++j ) { // rate/32 = 256/32 = 8
+            /// START eaglesong_absorb_comb ///
             integer = 0;
             for( k = 0 ; k < 4 ; ++k ) {
-                if( i*rate/8 + j*4 + k < input_length ) {
-                    integer = (integer << 8) ^ input[i*rate/8 + j*4 + k];
+                uint32_t iratejk_const = i*rate/8 + j*4 + k;
+                if( iratejk_const < input_length ) {
+                    integer = (integer << 8) ^ input[iratejk_const];
                 }
-                else if( i*rate/8 + j*4 + k == input_length ) {
+                else if( iratejk_const == input_length ) {
                     integer = (integer << 8) ^ delimiter;
                 }
             }
             state[j] = state[j] ^ integer;
+            /// END eaglesong_absorb_comb /// // FIXME: start here, implement this comb block
         }
         EaglesongPermutation(state);
     }
@@ -327,16 +333,22 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
 
 
     // squeezing
-    for( i = 0 ; i < output_length/(rate/8) ; ++i ) {
+    int i_max_squeeze = output_length/(rate/8) - 1; // output_length/(rate/8) = 32/(256/8) = 32/32 = 1
+    for( i = 0 ; i <= i_max_squeeze ; ++i ) {
         for( j = 0 ; j < rate/32 ; ++j ) {
             for( k = 0 ; k < 4 ; ++k ) {
-                output[i*rate/8 + j*4 + k] = (state[j] >> (8*k)) & 0xff;
+                uint32_t iratejk_const = i*rate/8 + j*4 + k;
+                output[iratejk_const] = (state[j] >> (8*k)) & 0xff;
             }
         }
-        EaglesongPermutation(state);
+
+        if (i != i_max_squeeze) {
+            // don't bother doing this stage for the final squeeze, as it's not actually used
+            EaglesongPermutation(state);
+        }
     }
 }
 
 void EaglesongHash( unsigned char * output, const unsigned char * input, unsigned int input_length ) {
-    EaglesongSponge(output, 32, input, input_length, 0x06);
+    EaglesongSponge(output, config_output_length, input, input_length, config_delimiter);
 }

@@ -1,3 +1,6 @@
+from typing import Literal, Union
+
+
 def PrintState( state ):
     s = ""
     for i in range(0, 16):
@@ -177,7 +180,15 @@ def EaglesongSponge( input_bytes, num_output_bytes, delimiter ):
 
     return output_bytes
 
-def EaglesongHash( input_bytes ):
-    # just run the sponge (with delimiter 0x06 -- hashing mode) and truncate to 32 bytes == 256 bits
+def EaglesongHash( input_bytes: Union[bytes, bytearray, list[int]] ):
+    # just run the sponge (with delimiter 0x06 -- hashing mode); result is 32 bytes == 256 bits
     return EaglesongSponge(bytearray(input_bytes), 32, 0x06)
 
+def eaglesong_hash_as_hex_str( input_bytes: bytes, case: Literal['upper', 'lower'] = 'lower') -> str:
+    assert case in ['upper', 'lower']
+
+    a = "".join([f"{i:02X}" for i in EaglesongHash(input_bytes)])
+    if case == 'lower':
+        return a.lower()
+    elif case == 'upper':
+        return a.upper()
