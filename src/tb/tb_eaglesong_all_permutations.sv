@@ -97,29 +97,29 @@ module tb_eaglesong_all_permutations;
         end
         #(CLK_PERIOD * 43); // should take 43ish clocks to complete
         
-        if (eval_output_ready != 1'b1) begin
-            $error("Assertion failed: eval_output_ready != 1'b1");
+        if (eval_output_ready !== 1'b1) begin
+            $error("Assertion failed: eval_output_ready !== 1'b1");
             tb_error_cnt = tb_error_cnt + 1;
         end
 
         // PYTHON: a = "    247E8664 6162D141 0B43C25D 3F4DCB6B D0E4954B CA9F52DB 3CE7EC1E D6727D07 B04C7AA2 FDA25B6F 0E629918 27920F6D 1F18E244 64EA88D4 A247DA8E 09ACB729".strip().split(' ')
-        // PYTHON: for idx, val in enumerate(a): print(f"(state_output[{idx}] != 32'h{val}) ||")
-        if ((state_output[0] != 32'h247E8664) ||
-                    (state_output[1] != 32'h6162D141) ||
-                    (state_output[2] != 32'h0B43C25D) ||
-                    (state_output[3] != 32'h3F4DCB6B) ||
-                    (state_output[4] != 32'hD0E4954B) ||
-                    (state_output[5] != 32'hCA9F52DB) ||
-                    (state_output[6] != 32'h3CE7EC1E) ||
-                    (state_output[7] != 32'hD6727D07) ||
-                    (state_output[8] != 32'hB04C7AA2) ||
-                    (state_output[9] != 32'hFDA25B6F) ||
-                    (state_output[10] != 32'h0E629918) ||
-                    (state_output[11] != 32'h27920F6D) ||
-                    (state_output[12] != 32'h1F18E244) ||
-                    (state_output[13] != 32'h64EA88D4) ||
-                    (state_output[14] != 32'hA247DA8E) ||
-                    (state_output[15] != 32'h09ACB729)
+        // PYTHON: for idx, val in enumerate(a): print(f"(state_output[{idx}] !== 32'h{val}) ||")
+        if ((state_output[0] !== 32'h247E8664) ||
+                    (state_output[1] !== 32'h6162D141) ||
+                    (state_output[2] !== 32'h0B43C25D) ||
+                    (state_output[3] !== 32'h3F4DCB6B) ||
+                    (state_output[4] !== 32'hD0E4954B) ||
+                    (state_output[5] !== 32'hCA9F52DB) ||
+                    (state_output[6] !== 32'h3CE7EC1E) ||
+                    (state_output[7] !== 32'hD6727D07) ||
+                    (state_output[8] !== 32'hB04C7AA2) ||
+                    (state_output[9] !== 32'hFDA25B6F) ||
+                    (state_output[10] !== 32'h0E629918) ||
+                    (state_output[11] !== 32'h27920F6D) ||
+                    (state_output[12] !== 32'h1F18E244) ||
+                    (state_output[13] !== 32'h64EA88D4) ||
+                    (state_output[14] !== 32'hA247DA8E) ||
+                    (state_output[15] !== 32'h09ACB729)
                 ) begin
             $error("Assertion failed: final output of main_test_task_1 is wrong");
             tb_error_cnt = tb_error_cnt + 1;
@@ -148,7 +148,7 @@ module tb_eaglesong_all_permutations;
 
         main_test_task_1();
 
-        if (tb_error_cnt != 0)
+        if (tb_error_cnt !== 0)
             $error(" --- Done tb_eaglesong_permutation -> main(). %d error(s). ", tb_error_cnt);
         else
             $display(" --- Done tb_eaglesong_permutation -> main(). No errors.");

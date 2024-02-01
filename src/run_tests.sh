@@ -35,3 +35,10 @@ echo "iverilog exit code: $?"
 echo "=== Running tb_eaglesong_all_permutations"
 vvp ./tb_eaglesong_all_permutations.iv_sim.vvp
 echo "=== Done tb_eaglesong_all_permutations"
+
+echo "=== Building tb_eaglesong_absorb_comb"
+iverilog $IVERILOG_ARGS -o ./tb_eaglesong_absorb_comb.iv_sim.vvp ./rtl/eaglesong_absorb_comb.sv ./tb/tb_eaglesong_absorb_comb.sv
+echo "iverilog exit code: $?"
+echo "=== Running tb_eaglesong_absorb_comb"
+vvp ./tb_eaglesong_absorb_comb.iv_sim.vvp
+echo "=== Done tb_eaglesong_absorb_comb"

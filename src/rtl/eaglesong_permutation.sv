@@ -34,7 +34,6 @@ module eaglesong_permutation(
     reg [4:0] const_coefficients [47:0];
     reg [31:0] const_injections [687:0];
 
-    // wire [9:0] round_num_store_left_four;
     wire [9:0] const_inj_idx [15:0];
 
     // initialize the const_coefficients array register

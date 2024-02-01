@@ -166,9 +166,14 @@ uint32_t reverse_bits_32(uint32_t in) {
     }
 }
 
-void print_array(uint32_t * array, uint16_t len) {
+void print_array_uint32(uint32_t * array, uint16_t len) {
     for (uint16_t i = 0; i < len; i++)
         printf("%08X ", array[i]);
+}
+
+void print_array_uint8(uint8_t * array, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++)
+        printf("%02X ", array[i]);
 }
 
 
@@ -187,7 +192,7 @@ void EaglesongPermutation( uint32_t * state ) {
 
     for( i = 0 ; i < num_rounds ; ++i ) {
         // printf("start of round:\n    ");
-        // print_array(state, 16); printf("\n");
+        // print_array_uint32(state, 16); printf("\n");
 
         // bit matrix
         for( j = 0 ; j < 16 ; ++j ) { // j is matrix column
@@ -239,9 +244,9 @@ void EaglesongPermutation( uint32_t * state ) {
             #endif
 
             // printf("bit_matrix stage: j=%d\n", j);
-            // print_array(state, 16); printf("\n");
-            // printf("new_cor: "); print_array(new_correct, j+1); printf("\n");
-            // printf("new_try: "); print_array(new, j+1); printf("\n");
+            // print_array_uint32(state, 16); printf("\n");
+            // printf("new_cor: "); print_array_uint32(new_correct, j+1); printf("\n");
+            // printf("new_try: "); print_array_uint32(new, j+1); printf("\n");
             // if (j == 3) exit(10);
             
         }
@@ -250,21 +255,21 @@ void EaglesongPermutation( uint32_t * state ) {
         }
 
         printf("between bit_matrix and circulant stage:\n    ");
-        print_array(state, 16); printf("\n");
+        print_array_uint32(state, 16); printf("\n");
 
         // circulant multiplication
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j]  ^  (state[j] << coefficients[3*j+1]) ^ (state[j] >> (32-coefficients[3*j+1]))  ^  (state[j] << coefficients[3*j+2]) ^ (state[j] >> (32-coefficients[3*j+2]));
         }
         printf("between circulant stage and constants injection stage:\n    ");
-        print_array(state, 16); printf("\n");
+        print_array_uint32(state, 16); printf("\n");
 
         // constants injection
         for( j = 0 ; j < 16 ; ++j ) {
             state[j] = state[j] ^ injection_constants[i*16+j];
         }
         printf("between injection stage and addrotadd stage:\n    ");
-        print_array(state, 16); printf("\n");
+        print_array_uint32(state, 16); printf("\n");
 
         // addition / rotation / addition ("addrotadd")
         #if 0
@@ -291,7 +296,7 @@ void EaglesongPermutation( uint32_t * state ) {
         #endif
 
         printf("after addrotadd stage:\n    ");
-        print_array(state, 16); printf("\n");
+        print_array_uint32(state, 16); printf("\n");
         printf("=== END OF ROUND #%d ===\n", i);
         // exit(1); // DEBUG
     }
@@ -301,8 +306,7 @@ void EaglesongPermutation( uint32_t * state ) {
 void EaglesongSponge( unsigned char * output, unsigned int output_length, const unsigned char * input, unsigned int input_length, uint8_t delimiter ) {
     uint32_t state[16];
     int i, j, k;
-    uint32_t integer;
-
+    
     // initialize to zero
     for( i = 0 ; i < 16 ; ++i ) {
         state[i] = 0;
@@ -310,22 +314,39 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
 
     // absorbing
     // assume max length is 32 bytes (256 bits)
-    for( i = 0 ; i < ((input_length+1)*8+rate-1) / rate ; ++i ) { // iteration thru i will happen on clocks
-        for( j = 0 ; j < rate/32 ; ++j ) { // rate/32 = 256/32 = 8
-            /// START eaglesong_absorb_comb ///
-            integer = 0;
-            for( k = 0 ; k < 4 ; ++k ) {
-                uint32_t iratejk_const = i*rate/8 + j*4 + k;
+    // absorb_round_num was previously called i
+    // iteration thru 'absorb_round_num' will happen on clocks
+    uint8_t absorb_round_num_max = (((input_length+1)*8+rate-1) / rate) - 1; // if input_length <= 31, then 0; if input_length >= 32, then 1
+    for( uint8_t absorb_round_num = 0 ; absorb_round_num <= absorb_round_num_max; absorb_round_num++ ) {
+        /// START eaglesong_absorb_comb ///
+        printf("=== START eaglesong_absorb_comb ==\n");
+        printf("absorb_round_num=%d, input_length=%u\n", absorb_round_num, input_length);
+        printf("input_value: "); print_array_uint8((uint8_t*)input, input_length); printf("\n");
+        printf("state_value: "); print_array_uint32(state, 16); printf("\n");
+        for( j = 0 ; j < rate/32 ; j++ ) { // rate/32 = 256/32 = 8 (j[2:0])
+            uint32_t absorb_state_modifier = 0;
+            for( k = 0 ; k < 4 ; k++ ) { // k[1:0]
+                // const uint32_t iratejk_const = absorb_round_num*rate/8 + j*4 + k;
+                const uint32_t iratejk_const = (absorb_round_num << 5) | (j << 2) | k;
+                ////////////////////         bits: {absorb_round_num[0], j[2:0], k[1:0]  }
+                //////////////////// iratejk_const[5:0] =======   0 <= iratejk_const <= 127
                 if( iratejk_const < input_length ) {
-                    integer = (integer << 8) ^ input[iratejk_const];
+                    // absorb_state_modifier = (absorb_state_modifier << 8) ^ input[iratejk_const];
+                    absorb_state_modifier = (absorb_state_modifier << 8) | input[iratejk_const];
                 }
                 else if( iratejk_const == input_length ) {
-                    integer = (integer << 8) ^ delimiter;
+                    // printf("iratejk_const == input_length\n");
+                    // absorb_state_modifier = (absorb_state_modifier << 8) ^ delimiter;
+                    absorb_state_modifier = (absorb_state_modifier << 8) | delimiter;
                 }
+                // else case does occur, but nothing should be done; just skip that iteration
+                
+                printf("j=%d, k=%d, absorb_state_modifier=%08X\n", j, k, absorb_state_modifier);
             }
-            state[j] = state[j] ^ integer;
-            /// END eaglesong_absorb_comb /// // FIXME: start here, implement this comb block
+            state[j] = state[j] ^ absorb_state_modifier;
         }
+        printf("state_value: "); print_array_uint32(state, 16); printf("\n");
+        /// END eaglesong_absorb_comb ///
         EaglesongPermutation(state);
     }
 
