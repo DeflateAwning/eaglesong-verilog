@@ -64,13 +64,13 @@ module eaglesong_absorb_comb(
 
                     ///// SYNTAX TYPE 2 /////
                     assign absorb_state_modifier[(j << 2) | k][31:0] = (
-                                    ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ?
-                                        input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8] :
-                                        (
-                                            ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ?
-                                                32'h06 : 32'h0
-                                        )
-                                );
+                                ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ?
+                                    input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8] :
+                                    (
+                                        ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ?
+                                            32'h06 : 32'h0
+                                    )
+                            );
 
                     ///// TESTING ///////
                     // assign absorb_state_modifier[(j << 2) | k][31:0] = 32'h0;
@@ -102,7 +102,6 @@ module eaglesong_absorb_comb(
                                             absorb_state_modifier[(j << 2) | (k - 1)]
                                     )
                             );
-                    // FIXME: start here to make the combined assign statement above actually work
 
                     //// Testing ////
                     // assign absorb_state_modifier[(j << 2) | k][31:0] = 
@@ -129,12 +128,6 @@ module eaglesong_absorb_comb(
     endgenerate
 
     initial begin
-        // $monitor("Time=%d, absorb_round_num=%d,\nnext_state_output=%h %h %h %h %h %h %h %h",
-        //     $time, absorb_round_num_store,
-        //     next_state_output[0], next_state_output[1], next_state_output[2],
-        //     next_state_output[3], next_state_output[4], next_state_output[5],
-        //     next_state_output[6], next_state_output[7]
-        // );
 
         // PYTHON:
         // for j in range(8):

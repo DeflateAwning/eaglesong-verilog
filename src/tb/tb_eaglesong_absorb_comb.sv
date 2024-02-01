@@ -73,7 +73,7 @@ module tb_eaglesong_absorb_comb;
     //----------------------------------------------------------------
     // Main Test Task - str1_round0
     // absorb_round_num = 0;
-    // input_length = 14;
+    // input_length = 14; (this str only does 1 round)
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
     task main_test_task_str1_round0; begin
@@ -116,6 +116,88 @@ module tb_eaglesong_absorb_comb;
     endtask
 
 
+    //----------------------------------------------------------------
+    // Main Test Task - str2_round0
+    // absorb_round_num = 0;
+    // input_length = 32;
+    // state_input is the result of input=[33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240] (str2)
+    //----------------------------------------------------------------
+    task main_test_task_str2_round0; begin
+        #(CLK_PERIOD*2);
+        
+        // PYTHON: a = [33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240]
+        // PYTHON: arev = reversed(a)
+        // PYTHON: arev = [f"{i:02X}" for i in arev]
+        // PYTHON: print("input_val <= 256'h" + ''.join(arev))
+        input_val <= 256'hF0076FEA59EB21788E3D74ACEB995CFDC2D1D6A5D36763D81583FDF3075FAB21;
+        input_length_bytes <= 7'd32;
+        absorb_round_num <= 6'h0;
+
+        #(CLK_PERIOD);
+
+        // PYTHON: a = "21AB5F07 F3FD8315 D86367D3 A5D6D1C2 FD5C99EB AC743D8E 7821EB59 EA6F07F0 ".split(' ')[:8]
+        // PYTHON: for idx, val in enumerate(a): print(f"(state_output[{idx}] !== 32'h{val}) ||")
+        if ((state_output[0] !== 32'h21AB5F07) ||
+                    (state_output[1] !== 32'hF3FD8315) ||
+                    (state_output[2] !== 32'hD86367D3) ||
+                    (state_output[3] !== 32'hA5D6D1C2) ||
+                    (state_output[4] !== 32'hFD5C99EB) ||
+                    (state_output[5] !== 32'hAC743D8E) ||
+                    (state_output[6] !== 32'h7821EB59) ||
+                    (state_output[7] !== 32'hEA6F07F0)
+                ) begin
+            $error("Assertion failed: state_output does not match expected value (main_test_task_str2_round0 test).");
+            tb_error_cnt = tb_error_cnt + 1;
+        end
+
+        #(CLK_PERIOD);
+    end
+    endtask
+
+    task main_test_task_str2_round1; begin
+        #(CLK_PERIOD*2);
+        
+        // PYTHON: a = [33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240]
+        // PYTHON: arev = reversed(a)
+        // PYTHON: arev = [f"{i:02X}" for i in arev]
+        // PYTHON: print("input_val <= 256'h" + ''.join(arev))
+        input_val <= 256'hF0076FEA59EB21788E3D74ACEB995CFDC2D1D6A5D36763D81583FDF3075FAB21;
+        input_length_bytes <= 7'd32;
+        absorb_round_num <= 6'h0;
+
+        // state output from round0 is the input for this round1
+        // PYTHON: a = "21AB5F07 F3FD8315 D86367D3 A5D6D1C2 FD5C99EB AC743D8E 7821EB59 EA6F07F0 ".split(' ')[:8]
+        // PYTHON: for idx, val in enumerate(a): print(f"state_input[{idx}] = 32'h{val};")
+        state_input[0] = 32'h21AB5F07;
+        state_input[1] = 32'hF3FD8315;
+        state_input[2] = 32'hD86367D3;
+        state_input[3] = 32'hA5D6D1C2;
+        state_input[4] = 32'hFD5C99EB;
+        state_input[5] = 32'hAC743D8E;
+        state_input[6] = 32'h7821EB59;
+        state_input[7] = 32'hEA6F07F0;
+
+        #(CLK_PERIOD);
+
+        // Note: for this round1, there should be no value change
+        // PYTHON: a = "21AB5F07 F3FD8315 D86367D3 A5D6D1C2 FD5C99EB AC743D8E 7821EB59 EA6F07F0 ".split(' ')[:8]
+        // PYTHON: for idx, val in enumerate(a): print(f"(state_output[{idx}] !== 32'h{val}) ||")
+        if ((state_output[0] !== 32'h21AB5F07) ||
+                    (state_output[1] !== 32'hF3FD8315) ||
+                    (state_output[2] !== 32'hD86367D3) ||
+                    (state_output[3] !== 32'hA5D6D1C2) ||
+                    (state_output[4] !== 32'hFD5C99EB) ||
+                    (state_output[5] !== 32'hAC743D8E) ||
+                    (state_output[6] !== 32'h7821EB59) ||
+                    (state_output[7] !== 32'hEA6F07F0)
+                ) begin
+            $error("Assertion failed: state_output does not match expected value (main_test_task_str2_round1 test).");
+            tb_error_cnt = tb_error_cnt + 1;
+        end
+
+        #(CLK_PERIOD);
+    end
+    endtask
 
     //----------------------------------------------------------------
     // main()
@@ -126,6 +208,9 @@ module tb_eaglesong_absorb_comb;
         init_task();
 
         main_test_task_str1_round0();
+
+        main_test_task_str2_round0();
+        main_test_task_str2_round1();
         // TODO: add more test cases, esp. with round1()
 
         if (tb_error_cnt !== 0)
