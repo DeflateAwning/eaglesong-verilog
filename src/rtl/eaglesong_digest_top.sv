@@ -22,37 +22,43 @@ module eaglesong_digest_top(
     localparam FSM_STATE_FINISH      = 3'h5;
     // FIXME: remove FSM probably
 
+    reg [2:0] fsm_state; // FIXME: either use the FSM, or remove it
+    // FSM_STATE_ALL_PERMS_0:
+        // * init state as all zeros
+        // * absorb.state_input <= state
+        // * perms.state_input <= absorb.state_output (absorb_state_out)
+        // * absorb_round_num <= 8'b0;
+        // When ready, then state <= perms_state_output
+    // FSM_STATE_ALL_PERMS_1:
+        // * absorb.state_input <= state
+        // * perms.state_input <= absorb.state_output (absorb_state_out)
+        // * absorb_round_num <= 8'b0;
+        // When ready, then state <= perms_state_output
+
+    
     genvar i;
     genvar j;
     genvar k;
 
-    reg [2:0] fsm_state; // FIXME: either use the FSM, or remove it
-    reg eval_output_ready_reg; // output of this whole block
-
+    // Input Value Storage
     reg [255:0] input_val_store;
     reg [6:0] input_length_bytes_store;
+
+    // Internal Working Storage
     reg [31:0] state [15:0];
-    wire [31:0] absorb_state_input_slice [7:0];
-    wire [31:0] state_absorb_comb_out [7:0];
-    wire [31:0] state_all_perm_input [15:0];
     reg [7:0] absorb_round_num;
-    reg start_eval_all_perms;
-    reg [31:0] state_calc_output [15:0];
+    reg perms_start_eval;
+    reg [31:0] perms_state_output [15:0];
+
+    // Internal Wires
+    wire [31:0] absorb_state_input_slice [7:0];
+    wire [31:0] absorb_state_out [7:0];
+    wire [31:0] perms_state_input [15:0];
     wire perms_eval_output_ready;
+    
+    // Output Value Storage
     reg [255:0] output_val_reg;
-
-    // FSM_STATE_ALL_PERMS_0:
-        // * init state as all zeros
-        // * absorb.state_input <= state
-        // * all_perm.state_input <= absorb.state_output (state_absorb_comb_out)
-        // * absorb_round_num <= 8'b0;
-        // When ready, then state <= state_calc_output
-
-    // FSM_STATE_ALL_PERMS_1:
-        // * absorb.state_input <= state
-        // * all_perm.state_input <= absorb.state_output (state_absorb_comb_out)
-        // * absorb_round_num <= 8'b0;
-        // When ready, then state <= state_calc_output
+    reg eval_output_ready_reg; // output of this whole block
 
     eaglesong_absorb_comb absorb(
             .state_input(absorb_state_input_slice), // absorb_state_input_slice ([7:0]) = state[7:0]
@@ -60,33 +66,31 @@ module eaglesong_digest_top(
             .input_length_bytes(input_length_bytes_store),
             .absorb_round_num(absorb_round_num),
 
-            .state_output(state_absorb_comb_out) // [7:0]
+            .state_output(absorb_state_out) // [7:0]
         );
 
-    eaglesong_all_permutations all_perm(
+    eaglesong_all_permutations perms(
             .clk(clk),
-            .state_input(state_all_perm_input), // state_all_perm_input = {8x 32'h0, state_absorb_comb_out[7:0]}
-            .start_eval(start_eval_all_perms),
+            .state_input(perms_state_input), // perms_state_input = {8x 32'h0, absorb_state_out[7:0]}
+            .start_eval(perms_start_eval),
 
-            .state_output(state_calc_output),
+            .state_output(perms_state_output),
             .eval_output_ready(perms_eval_output_ready)
         );
 
     // assign absorb_state_input_slice[7:0] = state[7:0]
-    // assign state_all_perm_input[7:0] = state_absorb_comb_out[7:0]
+    // assign perms_state_input[7:0] = absorb_state_out[7:0]
     generate
         for (i = 0; i <= 7; i++) begin
             assign absorb_state_input_slice[i] = state[i];
-            assign state_all_perm_input[i] = state_absorb_comb_out[i];
+            assign perms_state_input[i] = absorb_state_out[i];
         end
     endgenerate
 
-    // assign state_absorb_comb_out[15:8] = 32'h0
-    // assign state_all_perm_input[15:8] = 32'h0
+    // assign perms_state_input[15:8] = 32'h0
     generate
         for (i = 8; i <= 15; i++) begin
-            // assign state_absorb_comb_out[i] = 32'h0; // FIXME: check this, update comment above
-            assign state_all_perm_input[i] = 32'h0;
+            assign perms_state_input[i] = 32'h0;
         end
     endgenerate
 
@@ -96,12 +100,14 @@ module eaglesong_digest_top(
             // TODO: figure out what always_latch means, and maybe this should be always_latch
             always_ff @(posedge clk) begin
                 if (start_eval == 1'b1) begin
-                    state[i] <= 32'h0; // any value works, just needs to be set to something
+                    // any value works, just needs to be set to something for
+                    // input to absorb stage via absorb_state_input_slice
+                    state[i] <= 32'h0;
                 end
                 else if (start_eval == 1'b0) begin
                     if (perms_eval_output_ready == 1'b1) begin
                         // data's ready, store it
-                        state[i] <= state_calc_output[i];
+                        state[i] <= perms_state_output[i];
                     end
                 end
             end
@@ -120,9 +126,14 @@ module eaglesong_digest_top(
             input_val_store <= input_val;
             input_length_bytes_store <= input_length_bytes;
             // could store input value here if we wanted
+
+            // trigger starting the calculation
+            perms_start_eval <= 1'b1;
         end
         
         else if (start_eval == 1'b0) begin
+            perms_start_eval <= 1'b0;
+
             if ((eval_output_ready_reg == 1'b0) && (perms_eval_output_ready == 1'b1)) begin
                 // NOT start_eval && block's output not set to ready yet && current perms block is done
                 if (absorb_round_num == 8'h0) begin
@@ -162,5 +173,17 @@ module eaglesong_digest_top(
             end
         end
     endgenerate
+
+
+    initial begin
+        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nstart_eval_all_perms=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h",
+            $time, input_val_store, input_length_bytes_store, input_length_bytes_store,
+            state[0], state[1], state[14], state[15],
+            absorb_state_out[0], absorb_state_out[1], absorb_state_out[6], absorb_state_out[7],
+            perms_state_input[0], perms_state_input[1], perms_state_input[14], perms_state_input[15], 
+            perms_start_eval,
+            perms_eval_output_ready, perms_state_output[0], perms_state_output[1], perms_state_output[14], perms_state_output[15]
+        );
+    end
 
 endmodule
