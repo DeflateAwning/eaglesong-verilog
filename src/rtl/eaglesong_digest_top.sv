@@ -60,7 +60,7 @@ module eaglesong_digest_top(
     reg [255:0] output_val_reg;
     reg eval_output_ready_reg; // output of this whole block
 
-    eaglesong_absorb_comb absorb(
+    eaglesong_absorb_comb absorb( // combinational
             .state_input(absorb_state_input_slice), // absorb_state_input_slice ([7:0]) = state[7:0]
             .input_val(input_val_store),
             .input_length_bytes(input_length_bytes_store),
@@ -174,9 +174,8 @@ module eaglesong_digest_top(
         end
     endgenerate
 
-
     initial begin
-        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nstart_eval_all_perms=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h",
+        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h",
             $time, input_val_store, input_length_bytes_store, input_length_bytes_store,
             state[0], state[1], state[14], state[15],
             absorb_state_out[0], absorb_state_out[1], absorb_state_out[6], absorb_state_out[7],

@@ -61,7 +61,7 @@ module tb_eaglesong_all_permutations;
     // Run all permutations for the 'Hello, world!\n' test.
     //----------------------------------------------------------------
     int i = 0;
-    task main_test_task_1; begin
+    task main_test_task_str1; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test
@@ -87,15 +87,15 @@ module tb_eaglesong_all_permutations;
         state_input[15] <= 32'h00000000;
 
         start_eval <= 1'b1; // activate conversion
-        $display("Starting eval.");
+        // $display("Starting eval.");
         #(CLK_PERIOD * 2); // TODO: reduce to just one cycle
         start_eval <= 1'b0; // let conversion complete
 
         for (i = 0; i < 45; i++) begin
-            $display("Round %d: eval_output_ready=%d", i, eval_output_ready);
+            // $display("Round %d: eval_output_ready=%d", i, eval_output_ready);
             #(CLK_PERIOD);
         end
-        #(CLK_PERIOD * 43); // should take 43ish clocks to complete
+        // #(CLK_PERIOD * 43); // should take 43ish clocks to complete
         
         if (eval_output_ready !== 1'b1) begin
             $error("Assertion failed: eval_output_ready !== 1'b1");
@@ -121,7 +121,7 @@ module tb_eaglesong_all_permutations;
                     (state_output[14] !== 32'hA247DA8E) ||
                     (state_output[15] !== 32'h09ACB729)
                 ) begin
-            $error("Assertion failed: final output of main_test_task_1 is wrong");
+            $error("Assertion failed: final output of main_test_task_str1 is wrong");
             tb_error_cnt = tb_error_cnt + 1;
         end
 
@@ -144,7 +144,7 @@ module tb_eaglesong_all_permutations;
 
         init_task();
 
-        main_test_task_1();
+        main_test_task_str1();
 
         if (tb_error_cnt !== 0)
             $error(" --- Done tb_eaglesong_all_permutations -> main(). Argh, %d error(s). ", tb_error_cnt);
