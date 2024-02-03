@@ -108,7 +108,7 @@ module tb_eaglesong_coefficients;
         main_test_task();
 
         if (tb_error_cnt != 0)
-            $error(" --- Done tb_eaglesong_coefficients -> main(). %d error(s). ", tb_error_cnt);
+            $error(" --- Done tb_eaglesong_coefficients -> main(). Argh, %d error(s). ", tb_error_cnt);
         else
             $display(" --- Done tb_eaglesong_coefficients -> main(). No errors.");
 

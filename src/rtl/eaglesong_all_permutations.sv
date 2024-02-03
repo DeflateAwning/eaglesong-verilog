@@ -34,6 +34,7 @@ module eaglesong_all_permutations(
                 end
                 else if (start_eval == 1'b0) begin
                     if (eval_output_ready_reg == 1'b0) begin // if not yet complete
+                        // if we're not through every round, then copy this round's data to state
                         state[i] <= state_calc_output[i];
                     end
                 end
@@ -71,14 +72,12 @@ module eaglesong_all_permutations(
     endgenerate
     assign eval_output_ready = eval_output_ready_reg;
     
-
+    // Error check, just for fun
     always @(posedge clk) begin
         if (round_num > 6'd42) begin
             $error("In eaglesong_all_permutations, round_num has an invalid value (must be <=42).");
             $finish;
         end
     end
-
-
 
 endmodule

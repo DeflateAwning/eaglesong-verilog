@@ -383,7 +383,7 @@ module tb_eaglesong_permutation;
         main_test_task_str1_round42();
 
         if (tb_error_cnt !== 0)
-            $error(" --- Done tb_eaglesong_permutation -> main(). %d error(s). ", tb_error_cnt);
+            $error(" --- Done tb_eaglesong_permutation -> main(). Argh, %d error(s). ", tb_error_cnt);
         else
             $display(" --- Done tb_eaglesong_permutation -> main(). No errors.");
 

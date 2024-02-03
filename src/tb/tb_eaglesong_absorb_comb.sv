@@ -214,7 +214,7 @@ module tb_eaglesong_absorb_comb;
         // TODO: add more test cases, esp. with round1()
 
         if (tb_error_cnt !== 0)
-            $error(" --- Done tb_eaglesong_absorb_comb -> main(). %d error(s). ", tb_error_cnt);
+            $error(" --- Done tb_eaglesong_absorb_comb -> main(). Argh, %d error(s). ", tb_error_cnt);
         else
             $display(" --- Done tb_eaglesong_absorb_comb -> main(). No errors.");
 

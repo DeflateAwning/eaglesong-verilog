@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 
 module eaglesong_absorb_comb(
+        // NOTE: state[15:8] not used/modified, and thus aren't passed
+
         // state_input is ignored when absorb_round_num == 0 (but cannot be bx),
         // and then the output of the previous round for the next one
         input [31:0] state_input [7:0],
@@ -65,8 +67,10 @@ module eaglesong_absorb_comb(
                     ///// SYNTAX TYPE 2 /////
                     assign absorb_state_modifier[(j << 2) | k][31:0] = (
                                 ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ?
-                                    input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8] :
-                                    (
+                                    {
+                                        24'h0,
+                                        input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8]
+                                    } : (
                                         ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ?
                                             32'h06 : 32'h0
                                     )
@@ -75,8 +79,7 @@ module eaglesong_absorb_comb(
                     ///// TESTING ///////
                     // assign absorb_state_modifier[(j << 2) | k][31:0] = 32'h0;
 
-                    // FIXME: update the C model to be like this if it doesn't work
-
+                    // NOTE: we can update the C model to match this better if we want
                 end
                 else begin
                     //// SYNTAX TYPE 1 ////

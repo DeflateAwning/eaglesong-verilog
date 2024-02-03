@@ -339,7 +339,7 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
                     // absorb_state_modifier = (absorb_state_modifier << 8) ^ delimiter;
                     absorb_state_modifier = (absorb_state_modifier << 8) | delimiter;
                 }
-                // else case does occur, but nothing should be done; just skip that iteration
+                // else block/clause does occur, but nothing should be done; just skip that iteration and retain the previous value
                 
                 printf("j=%d, k=%d, absorb_state_modifier=%08X\n", j, k, absorb_state_modifier);
             }
@@ -356,7 +356,7 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
     // squeezing
     int i_max_squeeze = output_length/(rate/8) - 1; // output_length/(rate/8) = 32/(256/8) = 32/32 = 1
     for( i = 0 ; i <= i_max_squeeze ; ++i ) {
-        for( j = 0 ; j < rate/32 ; ++j ) {
+        for( j = 0 ; j < rate/32 ; ++j ) { // j < 8
             for( k = 0 ; k < 4 ; ++k ) {
                 uint32_t iratejk_const = i*rate/8 + j*4 + k;
                 output[iratejk_const] = (state[j] >> (8*k)) & 0xff;

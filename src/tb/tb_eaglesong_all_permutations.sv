@@ -88,7 +88,7 @@ module tb_eaglesong_all_permutations;
 
         start_eval <= 1'b1; // activate conversion
         $display("Starting eval.");
-        #(CLK_PERIOD * 2); // TOOD: reduce to just one cycle
+        #(CLK_PERIOD * 2); // TODO: reduce to just one cycle
         start_eval <= 1'b0; // let conversion complete
 
         for (i = 0; i < 45; i++) begin
@@ -125,9 +125,7 @@ module tb_eaglesong_all_permutations;
             tb_error_cnt = tb_error_cnt + 1;
         end
 
-        #(CLK_PERIOD*100);
-
-        // TODO: add more test cases, including different round numbers
+        #(CLK_PERIOD*10);
 
         // force an error, for confirming that the test best works
         // #(CLK_PERIOD);
@@ -142,16 +140,16 @@ module tb_eaglesong_all_permutations;
     // main()
     //----------------------------------------------------------------
     initial begin : main
-        $display(" --- Starting tb_eaglesong_permutation -> main();");
+        $display(" --- Starting tb_eaglesong_all_permutations -> main();");
 
         init_task();
 
         main_test_task_1();
 
         if (tb_error_cnt !== 0)
-            $error(" --- Done tb_eaglesong_permutation -> main(). %d error(s). ", tb_error_cnt);
+            $error(" --- Done tb_eaglesong_all_permutations -> main(). Argh, %d error(s). ", tb_error_cnt);
         else
-            $display(" --- Done tb_eaglesong_permutation -> main(). No errors.");
+            $display(" --- Done tb_eaglesong_all_permutations -> main(). No errors.");
 
         $finish;
     
