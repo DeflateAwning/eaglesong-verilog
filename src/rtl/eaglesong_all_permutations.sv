@@ -19,6 +19,8 @@ module eaglesong_all_permutations(
     reg [5:0] round_num; // must be 0 <= round_num <= 42
     reg eval_output_ready_reg;
 
+    reg [31:0] state_output_hold_reg [15:0]; // store the output so it's maintained upon changing input
+
     eaglesong_permutation perm( // combinational
             .state_input(state),
             .round_num(round_num),
@@ -65,10 +67,21 @@ module eaglesong_all_permutations(
         end
     end
 
+    // when it's complete, copy "state" to "state_output_hold_reg"
+    generate
+        for (i = 0; i < 16; i++) begin
+            always_ff @(posedge clk) begin
+                if (round_num == 6'd42) begin
+                    state_output_hold_reg[i] <= state[i];
+                end
+            end
+        end
+    endgenerate
+
     // assign output registers to output wires/ports
     generate
         for (i = 0; i < 16; i++) begin
-            assign state_output[i] = state[i];
+            assign state_output[i] = state_output_hold_reg[i];
         end
     endgenerate
     assign eval_output_ready = eval_output_ready_reg;
