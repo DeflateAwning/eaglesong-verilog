@@ -38,7 +38,7 @@ module eaglesong_digest_top(
     reg [31:0] state [15:0];
     reg [7:0] absorb_round_num;
     reg perms_start_eval;
-    reg [31:0] perms_state_output [15:0];
+    wire [31:0] perms_state_output [15:0];
 
     // Internal Wires
     wire [31:0] absorb_state_input_slice [7:0];
@@ -47,8 +47,7 @@ module eaglesong_digest_top(
     wire perms_eval_output_ready;
     
     // Output Value Storage
-    reg [255:0] output_val_reg;
-    reg eval_output_ready_reg; // output of this whole block
+    reg eval_output_ready_reg;
 
     eaglesong_absorb_comb absorb( // combinational
             .state_input(absorb_state_input_slice), // absorb_state_input_slice ([7:0]) = state[7:0]
@@ -94,7 +93,7 @@ module eaglesong_digest_top(
                     state[i] <= 32'h0;
 
                     // init the output register (probably not necessary)
-                    perms_state_output[i] <= 32'h0;
+                    // perms_state_output[i] <= 32'h0;
                 end
                 else if (start_eval == 1'b0) begin
                     if (perms_eval_output_ready == 1'b1) begin
@@ -119,9 +118,6 @@ module eaglesong_digest_top(
 
             // trigger starting the calculation
             perms_start_eval <= 1'b1;
-
-            // init/reset the output register (probably not necessary)
-            output_val_reg <= 256'h0;
         end
         
         else if (start_eval == 1'b0) begin
@@ -145,35 +141,12 @@ module eaglesong_digest_top(
     generate
         for (j = 0; j < 8; j++) begin // j < rate/32=8
             for (k = 0; k < 4; k++) begin
-                always_ff @(posedge clk) begin
-                    if (
-                        (start_eval == 1'b0) &&
-                        (perms_eval_output_ready == 1'b1) &&
-                        (absorb_round_num == 8'h1)
-                    ) begin
-                        // NOTE: runs only once, i=0
-                        // uint32_t iratejk_const = i*rate/8 + j*4 + k;
-                        // output[iratejk_const] = (state[j] >> (8*k)) & 0xff;
-
-                        // assign in 8-byte chunks (LSB is the j+k part)
-                        // output_val_reg[(j << 2) | k +: 8] <= (state[j] >> (k << 3)) & 8'hFF;
-                        output_val_reg[((j << 2) | k)*8 +: 8] <= state[j][k << 3 +: 8];
-                        
-                        // debugging assignment
-                        // output_val_reg[((j << 2) | k)*8 +: 8] <= ((j << 2) | k);
-
-                        // For example: 0x12345678
-                        // when k = 0, then k<<3 = 0, so (state[j] >> 0) & 0xff = 0x78
-                        // when k = 1, then k<<3 = 8, so (state[j] >> 8) & 0xff = 0x56
-                        // when k = 2, then k<<3 = 16, so (state[j] >> 16) & 0xff = 0x34
-                    end
-                end
+                assign output_val[((j << 2) | k)*8 +: 8] = state[j][k << 3 +: 8];
             end
         end
     endgenerate
 
     // assign output registers to output wires/ports
-    assign output_val = output_val_reg;
     assign eval_output_ready = eval_output_ready_reg;
 
     initial begin

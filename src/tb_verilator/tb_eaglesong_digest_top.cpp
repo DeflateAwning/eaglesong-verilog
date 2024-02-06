@@ -21,6 +21,10 @@ void tick() {
     m_trace->dump(sim_time++);
 }
 
+void print_output_array(Veaglesong_digest_top *dut) {
+    printf("LOG: Output array: %08X\n", dut->output_val[0]);
+}
+
 int main(int argc, char** argv, char** env) {
     dut = new Veaglesong_digest_top;
 
@@ -58,6 +62,16 @@ int main(int argc, char** argv, char** env) {
     
     while (sim_time < MAX_SIM_TIME) {
         tick();
+
+        // when the output is ready, run a couple more ticks then end
+        if (dut->eval_output_ready) {
+            printf("LOG: eval_output_ready>0 now.\n");
+            print_output_array(dut);
+
+            for (int i = 0; i < 5; i++) tick();
+            printf("LOG: ending because eval_output_ready>0 now.\n");
+            break;
+        }
     }
 
     m_trace->close();
