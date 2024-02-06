@@ -34,7 +34,10 @@ module eaglesong_absorb_comb(
     // k_max * j_max array elements (each element is at index: [j << 2 | k] )
     wire [5:0] iratejk_const [31:0]; // 6-bit, 4 array elements (each element is at a k)
     // 32-bit Uint
+    /* verilator lint_off UNOPTFLAT */
     wire [31:0] absorb_state_modifier [31:0];
+    /* verilator lint_on UNOPTFLAT */
+    // TODO: fix linting/simulation error via: https://verilator.org/guide/latest/warnings.html#cmdoption-arg-UNOPTFLAT
 
     // assign inputs to internal wire/reg (in the future, store the input to a register)
     assign input_val_store = input_val;
@@ -115,11 +118,16 @@ module eaglesong_absorb_comb(
                 end
             end
 
-            assign next_state_output[j] = 
+            assign next_state_output[j] =
                     (
                         state_input_store[j][31:0] & 
-                        {32{ (| absorb_round_num_store[7:0])}}
+                            {32{ (| absorb_round_num_store[7:0])}}
                     ) ^ absorb_state_modifier[(j << 2) | 3][31:0]; // force k=3 for latest, 32-bit XOR
+
+                    // Alternative, requires an always block though:
+                        // (absorb_round_num_store == 8'h0) ?
+                        // 32'h0 : 
+                        // state_input_store[j][31:0] ^ absorb_state_modifier[(j << 2) | 3][31:0]
         end
     endgenerate
 
@@ -129,7 +137,7 @@ module eaglesong_absorb_comb(
             assign state_output[i] = next_state_output[i];
         end
     endgenerate
-
+/*
     initial begin
 
         // PYTHON:
@@ -164,6 +172,6 @@ module eaglesong_absorb_comb(
 
         );
 
-    end
+    end */
 
 endmodule

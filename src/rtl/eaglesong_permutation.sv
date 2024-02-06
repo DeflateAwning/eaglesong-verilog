@@ -19,7 +19,12 @@ module eaglesong_permutation(
     wire [31:0] bitmatrix_step_output_state [15:0];
     wire [31:0] circulant_step_output_state [15:0];
     wire [31:0] injection_step_output_state [15:0];
+
+    /* verilator lint_off UNOPTFLAT */
     wire [31:0] addrotadd_step_output_state [15:0];
+    /* verilator lint_on UNOPTFLAT */
+    // TODO: convert logic to this: https://verilator.org/guide/latest/warnings.html#cmdoption-arg-UNOPTFLAT
+
     wire [31:0] addrotadd_step_intermed1 [7:0];
     wire [31:0] next_state_output [15:0];
 
@@ -247,7 +252,8 @@ module eaglesong_permutation(
         for (j = 0; j < 16; j+=2) begin
             assign addrotadd_step_intermed1[j >> 1] = injection_step_output_state[j] + injection_step_output_state[j+1];
             assign addrotadd_step_output_state[j] = (addrotadd_step_intermed1[j >> 1] << 8) ^ (addrotadd_step_intermed1[j >> 1] >> 24);
-            assign addrotadd_step_output_state[j+1] = addrotadd_step_output_state[j] + ((injection_step_output_state[j+1] << 24) ^ (injection_step_output_state[j+1] >> 8));
+            assign addrotadd_step_output_state[j+1] = addrotadd_step_output_state[j] + 
+                            ((injection_step_output_state[j+1] << 24) ^ (injection_step_output_state[j+1] >> 8));
         end
     endgenerate
 
@@ -269,6 +275,7 @@ module eaglesong_permutation(
     endgenerate
 
     initial begin
+        /*
         $monitor("Time=%d, round_num=%d,\nbitmatrix_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ncirculant_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ninjection_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\naddrotadd_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
             $time, round_num_store,
             bitmatrix_step_output_state[0], bitmatrix_step_output_state[1], bitmatrix_step_output_state[2],
@@ -299,6 +306,7 @@ module eaglesong_permutation(
             addrotadd_step_output_state[12], addrotadd_step_output_state[13], addrotadd_step_output_state[14],
             addrotadd_step_output_state[15]
         );
+        */
     end
 
 endmodule

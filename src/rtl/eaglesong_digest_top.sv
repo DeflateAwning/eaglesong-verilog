@@ -169,7 +169,13 @@ module eaglesong_digest_top(
                         // output[iratejk_const] = (state[j] >> (8*k)) & 0xff;
 
                         // assign in 8-byte chunks (LSB is the j+k part)
-                        output_val_reg[(j << 2) | k +: 8] <= (state[j] >> (k << 3)) & 8'hFF;
+                        // output_val_reg[(j << 2) | k +: 8] <= (state[j] >> (k << 3)) & 8'hFF;
+                        output_val_reg[(j << 2) | k +: 8] <= state[j][k << 3 +: 8];
+
+                        // For example: 0x12345678
+                        // when k = 0, then k<<3 = 0, so (state[j] >> 0) & 0xff = 0x78
+                        // when k = 1, then k<<3 = 8, so (state[j] >> 8) & 0xff = 0x56
+                        // when k = 2, then k<<3 = 16, so (state[j] >> 16) & 0xff = 0x34
                     end
                 end
             end

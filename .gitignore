@@ -1,2 +1,7 @@
 # iverilog build products
 *.iv_sim.vvp
+
+# verilator build products
+*.vcd
+**/obj_dir/
+# TODO: confirm if we want to ignore obj_dir

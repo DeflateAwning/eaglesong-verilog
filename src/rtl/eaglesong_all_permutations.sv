@@ -95,6 +95,7 @@ module eaglesong_all_permutations(
     end
 
     initial begin
+        /*
         $monitor("Time=%d, state_input[0,1,14,15]=%h %h ... %h %h, round_num=%d, eval_output_ready_reg=%d,\nstate=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
             $time,
             state_input[0], state_input[1], state_input[14], state_input[15],
@@ -104,6 +105,7 @@ module eaglesong_all_permutations(
             state[8], state[9], state[10], state[11],
             state[12], state[13], state[14], state[15]
         );
+        */
     end
 
 endmodule

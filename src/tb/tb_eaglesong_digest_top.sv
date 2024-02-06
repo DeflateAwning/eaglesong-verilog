@@ -1,7 +1,9 @@
 `timescale 1ns/1ps
 `default_nettype none // recommended for better warnings
 
-module tb_eaglesong_digest_top;
+module tb_eaglesong_digest_top(
+            input tb_clk
+        );
 
     //----------------------------------------------------------------
     // Internal constant and parameter definitions.
@@ -25,7 +27,7 @@ module tb_eaglesong_digest_top;
     wire [255:0] output_val;
     wire eval_output_ready;
 
-    reg tb_clk = 0;
+    // reg tb_clk = 0;
     reg [7:0] tb_error_cnt = 0;
 
     //----------------------------------------------------------------
@@ -46,19 +48,19 @@ module tb_eaglesong_digest_top;
     //
     // Always running clock generator process.
     //----------------------------------------------------------------
-    always begin : clk_gen
-        #CLK_HALF_PERIOD;
-        tb_clk = !tb_clk;
-    end // clk_gen
+    // always begin : clk_gen
+    //     #CLK_HALF_PERIOD;
+    //     tb_clk = !tb_clk;
+    // end // clk_gen
 
     task init_task;
         begin
             // for fun, not really needed because we set it later
-            input_val <= 32'h0;
-            input_length_bytes <= 32'h0; // technically invalid
+            input_val = 256'h0;
+            input_length_bytes = 7'h0; // length=0 is technically invalid
 
             // main reset
-            start_eval <= 1'b0;
+            start_eval = 1'b0;
         end
     endtask
 
@@ -73,13 +75,13 @@ module tb_eaglesong_digest_top;
         // set the 'Hello, world!\n' test (literally, that text)
         // PYTHON: a = "48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 0A".split(' ')
         // PYTHON: arev = reversed(a)
-        // PYTHON: print("input_val <= 256'h" + ''.join(arev))
-        input_val <= 256'h0A21646C726F77202C6F6C6C6548;
-        input_length_bytes <= 7'd14;
+        // PYTHON: print("input_val = 256'h" + ''.join(arev))
+        input_val = 256'h0A21646C726F77202C6F6C6C6548;
+        input_length_bytes = 7'd14;
 
-        start_eval <= 1'b1; // activate conversion
+        start_eval = 1'b1; // activate conversion
         #(CLK_PERIOD * 2); // TODO: reduce to just one cycle
-        start_eval <= 1'b0; // let conversion complete
+        start_eval = 1'b0; // let conversion complete
 
         while ((eval_output_ready !== 1'b1) && (calc_clk_count < 120)) begin
             #(CLK_PERIOD);
@@ -115,7 +117,7 @@ module tb_eaglesong_digest_top;
     // main()
     //----------------------------------------------------------------
     initial begin : main
-        $display(" --- Starting eaglesong_digest_top -> main();");
+        $display(" --- Starting tb_eaglesong_digest_top -> main();");
 
         init_task();
 
@@ -123,9 +125,9 @@ module tb_eaglesong_digest_top;
         // TODO: add more test cases, including different round numbers
 
         if (tb_error_cnt !== 0)
-            $error(" --- Done eaglesong_digest_top -> main(). Argh, %d error(s). ", tb_error_cnt);
+            $error(" --- Done tb_eaglesong_digest_top -> main(). Argh, %d error(s). ", tb_error_cnt);
         else
-            $display(" --- Done eaglesong_digest_top -> main(). No errors.");
+            $display(" --- Done tb_eaglesong_digest_top -> main(). No errors.");
 
         $finish;
     
