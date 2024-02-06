@@ -31,7 +31,7 @@ module eaglesong_all_permutations(
     // handle start_eval case: copy state_input to state (for every index)
     generate
         for (i = 0; i < 16; i++) begin
-            always_ff @(posedge clk) begin // TODO: figure out what always_latch means, and maybe this should be always_latch
+            always_ff @(posedge clk) begin
                 if (start_eval == 1'b1) begin
                     state[i] <= state_input[i];
                 end

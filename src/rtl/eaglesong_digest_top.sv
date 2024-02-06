@@ -60,8 +60,6 @@ module eaglesong_digest_top(
     reg [255:0] output_val_reg;
     reg eval_output_ready_reg; // output of this whole block
 
-    // FIXME: start here, setup running in Verilator to get waveforms!!! Also, take a quick look through TODOs.
-
     eaglesong_absorb_comb absorb( // combinational
             .state_input(absorb_state_input_slice), // absorb_state_input_slice ([7:0]) = state[7:0]
             .input_val(input_val_store),
@@ -99,7 +97,6 @@ module eaglesong_digest_top(
     // handle start_eval case: copy state_input to state (for every index)
     generate
         for (i = 0; i < 16; i++) begin
-            // TODO: figure out what always_latch means, and maybe this should be always_latch
             always_ff @(posedge clk) begin
                 if (start_eval == 1'b1) begin
                     // any value works, just needs to be set to something for

@@ -26,7 +26,6 @@ module eaglesong_permutation(
     // TODO: convert logic to this: https://verilator.org/guide/latest/warnings.html#cmdoption-arg-UNOPTFLAT
 
     wire [31:0] addrotadd_step_intermed1 [7:0];
-    wire [31:0] next_state_output [15:0];
 
 
     // const_bit_matrix generated with Python:
@@ -187,7 +186,7 @@ module eaglesong_permutation(
 
     
     // assign inputs to internal wire/reg (in the future, store the input to a register)
-    generate // TODO: replace with single assignment statement, when supported by iverilog
+    generate
         for (i = 0; i < 16; i=i+1) begin
             // always_ff @(posedge start_eval) begin
             //     state_input_store[i] <= state_input[i];
@@ -257,20 +256,10 @@ module eaglesong_permutation(
         end
     endgenerate
 
+    // copy addrotadd_step_output_state (final operation) to state_output
     generate
-        // TEMP DEBUG: copy bitmatrix_step_output_state right to the output
-        // TODO: replace this with the rest of the comb/seq logic to make this work well
         for (i = 0; i < 16; i=i+1) begin
-            assign next_state_output[i] = addrotadd_step_output_state[i];
-        end
-    endgenerate
-
-
-
-    // copy next_state_output to state_output
-    generate // TODO: replace with single assignment statement, when supported by iverilog
-        for (i = 0; i < 16; i=i+1) begin
-            assign state_output[i] = next_state_output[i];
+            assign state_output[i] = addrotadd_step_output_state[i];
         end
     endgenerate
 

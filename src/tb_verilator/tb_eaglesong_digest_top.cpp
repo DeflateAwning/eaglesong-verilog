@@ -41,9 +41,12 @@ int main(int argc, char** argv, char** env) {
     dut->input_val[0] = 0x6C6C6548;
     dut->input_val[1] = 0x77202C6F;
     dut->input_val[2] = 0x646C726F;
-    dut->input_val[3] = 0x0A21;
+    dut->input_val[3] = 0x00000A21;
+    dut->input_val[4] = 0;
+    dut->input_val[5] = 0;
+    dut->input_val[6] = 0;
+    dut->input_val[7] = 0;
 
-    // Note: the rest of the 32 bytes get set to zero
     dut->input_length_bytes = 14;
     dut->start_eval = 1;
     
