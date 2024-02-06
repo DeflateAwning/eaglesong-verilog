@@ -13,16 +13,7 @@ module eaglesong_digest_top(
         output eval_output_ready
     );
 
-
-    // Control FSM state names.
-    localparam FSM_STATE_INIT        = 3'h0;
-    localparam FSM_STATE_ALL_PERMS_0 = 3'h1; // "first" time through the "all perms" block
-    localparam FSM_STATE_ALL_PERMS_1 = 3'h2; // "final" time through the "all perms" block (max 2 times)
-    // TODO: add squeeze state/block, probably
-    localparam FSM_STATE_FINISH      = 3'h5;
-    // FIXME: remove FSM probably
-
-    reg [2:0] fsm_state; // FIXME: either use the FSM, or remove it
+    // Pseudo-FSM Plan, roughly:
     // FSM_STATE_ALL_PERMS_0:
         // * init state as all zeros
         // * absorb.state_input <= state
@@ -35,7 +26,6 @@ module eaglesong_digest_top(
         // * absorb_round_num <= 8'b0;
         // When ready, then state <= perms_state_output
 
-    
     genvar i;
     genvar j;
     genvar k;
@@ -102,6 +92,9 @@ module eaglesong_digest_top(
                     // any value works, just needs to be set to something for
                     // input to absorb stage via absorb_state_input_slice
                     state[i] <= 32'h0;
+
+                    // init the output register (probably not necessary)
+                    perms_state_output[i] <= 32'h0;
                 end
                 else if (start_eval == 1'b0) begin
                     if (perms_eval_output_ready == 1'b1) begin
@@ -116,8 +109,6 @@ module eaglesong_digest_top(
     // handle start_eval case: non-generate part
     always_ff @(posedge clk) begin
         if (start_eval == 1'b1) begin
-            fsm_state <= FSM_STATE_INIT;
-
             absorb_round_num <= 8'b0;
             eval_output_ready_reg <= 1'b0; // not ready
 
@@ -128,6 +119,9 @@ module eaglesong_digest_top(
 
             // trigger starting the calculation
             perms_start_eval <= 1'b1;
+
+            // init/reset the output register (probably not necessary)
+            output_val_reg <= 256'h0;
         end
         
         else if (start_eval == 1'b0) begin
@@ -147,10 +141,6 @@ module eaglesong_digest_top(
         end
     end
 
-    // assign output registers to output wires/ports
-    assign output_val = output_val_reg;
-    assign eval_output_ready = eval_output_ready_reg;
-
     // assign the state-to-output_val squeeze conversion
     generate
         for (j = 0; j < 8; j++) begin // j < rate/32=8
@@ -158,8 +148,8 @@ module eaglesong_digest_top(
                 always_ff @(posedge clk) begin
                     if (
                         (start_eval == 1'b0) &&
-                        (eval_output_ready_reg == 1'b0) && (perms_eval_output_ready == 1'b1) &&
-                        (absorb_round_num != 8'h1)
+                        (perms_eval_output_ready == 1'b1) &&
+                        (absorb_round_num == 8'h1)
                     ) begin
                         // NOTE: runs only once, i=0
                         // uint32_t iratejk_const = i*rate/8 + j*4 + k;
@@ -167,7 +157,10 @@ module eaglesong_digest_top(
 
                         // assign in 8-byte chunks (LSB is the j+k part)
                         // output_val_reg[(j << 2) | k +: 8] <= (state[j] >> (k << 3)) & 8'hFF;
-                        output_val_reg[(j << 2) | k +: 8] <= state[j][k << 3 +: 8];
+                        output_val_reg[((j << 2) | k)*8 +: 8] <= state[j][k << 3 +: 8];
+                        
+                        // debugging assignment
+                        // output_val_reg[((j << 2) | k)*8 +: 8] <= ((j << 2) | k);
 
                         // For example: 0x12345678
                         // when k = 0, then k<<3 = 0, so (state[j] >> 0) & 0xff = 0x78
@@ -179,14 +172,20 @@ module eaglesong_digest_top(
         end
     endgenerate
 
+    // assign output registers to output wires/ports
+    assign output_val = output_val_reg;
+    assign eval_output_ready = eval_output_ready_reg;
+
     initial begin
-        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h",
+        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h, absorb_round_num=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h\neval_output_ready=%h, output_val=%h\n",
             $time, input_val_store, input_length_bytes_store, input_length_bytes_store,
             state[0], state[1], state[14], state[15],
             absorb_state_out[0], absorb_state_out[1], absorb_state_out[6], absorb_state_out[7],
             perms_state_input[0], perms_state_input[1], perms_state_input[14], perms_state_input[15], 
-            perms_start_eval,
-            perms_eval_output_ready, perms_state_output[0], perms_state_output[1], perms_state_output[14], perms_state_output[15]
+            perms_start_eval, absorb_round_num,
+            perms_eval_output_ready, perms_state_output[0], perms_state_output[1], perms_state_output[14], perms_state_output[15],
+            eval_output_ready,
+            output_val
         );
     end
 

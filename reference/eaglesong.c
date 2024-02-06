@@ -355,17 +355,23 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
 
     // squeezing
     int i_max_squeeze = output_length/(rate/8) - 1; // output_length/(rate/8) = 32/(256/8) = 32/32 = 1
-    for( i = 0 ; i <= i_max_squeeze ; ++i ) {
+    for( i = 0 ; i <= i_max_squeeze ; i++ ) {
         for( j = 0 ; j < rate/32 ; ++j ) { // j < 8
             for( k = 0 ; k < 4 ; ++k ) {
-                uint32_t iratejk_const = i*rate/8 + j*4 + k;
+                uint32_t iratejk_const = i*rate/8 + j*4 + k; // from 0 to 31
                 output[iratejk_const] = (state[j] >> (8*k)) & 0xff;
+
+                printf("j=%d, k=%d, squeeze_output[iratejk_const=%d]=%02X, state[j=%d]=%08X\n",
+                        j, k, iratejk_const, output[iratejk_const],
+                        j, state[j]
+                    );
             }
         }
 
         if (i != i_max_squeeze) {
             // don't bother doing this stage for the final squeeze, as it's not actually used
             EaglesongPermutation(state);
+            printf("PERMUTATING IN SQUEEZE\n");
         }
     }
 }
