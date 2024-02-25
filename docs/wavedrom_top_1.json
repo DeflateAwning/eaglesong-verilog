@@ -1,0 +1,23 @@
+{
+    "signal": [
+      { "name": "clk",                 "wave": "p....|...|.....|...|.." },
+      { "name": "input_val",           "wave": "x.=x.|...|..=x.|...|..", "data": ["00..0A..48", "d33..d240"] },
+      { "name": "input_length_bytes",  "wave": "x.=x.|...|..=x.|...|..", "data": ["14",         "32"       ] },
+      { "name": "start_eval",          "wave": "0.10.|...|..10.|...|.." },
+      {},
+      { "name": "output_val",          "wave": "x....|.=.|...x.|.=.|..", "data": ["D6..64",     "7D..C1"   ] },
+      { "name": "eval_output_ready",   "wave": "0....|.1.|...0.|.1.|.." },
+      {},
+      // TODO: comments here
+    ],
+    // TODO: make the output transitions happen right before a rising clock instead of right after one
+    // TODO: add "computation occuring", "inputs sampled" text, "<info about data in/out source>"
+    "head": {
+        "text": "eaglesong_digest_top Usage - Example 1",
+        // "tick": 0,
+        "tock": 1
+    },
+    "foot": {
+        "tock": 1
+    }
+}

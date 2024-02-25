@@ -1,8 +1,8 @@
 {
     "recommendations": [
-      "esbenp.prettier-vscode",
-      "ban.spellright",
-      "unifiedjs.vscode-mdx"
+        "esbenp.prettier-vscode",
+        "ban.spellright",
+        "unifiedjs.vscode-mdx",
+        "bmpenuelas.waveform-render"
     ]
-  }
-  
+}
