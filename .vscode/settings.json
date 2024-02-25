@@ -1,0 +1,32 @@
+{
+    "editor.rulers": [120],
+    "prettier.proseWrap": "always",
+    "[mdx]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.wordWrap": "off"
+    },
+    "[markdown]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.wordWrap": "off"
+    },
+    "[jsonc]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.wordWrap": "off"
+    },
+    "spellright.language": ["en-GB-10-1."],
+    "spellright.documentTypes": ["mdx", "markdown"],
+    "spellright.parserByClass": {
+        "mdx": {
+            "parser": "markdown"
+        },
+        "markdown": {
+            "parser": "markdown"
+        }
+    },
+    "spellright.ignoreRegExpsByClass": {
+        "mdx": ["/&amp;/g", "/&nbsp;/g", "/&mdash;/g", "/&gt;/g", "/&lt;/g"]
+    }
+}

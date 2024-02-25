@@ -103,6 +103,8 @@ module tb_eaglesong_digest_top(
             tb_error_cnt = tb_error_cnt + 1;
         end
 
+        // TODO: convert to assertions ("property" in SystemVerilog)
+
         #(CLK_PERIOD*2);
         // force an error, for confirming that the test best works
         // #(CLK_PERIOD);
