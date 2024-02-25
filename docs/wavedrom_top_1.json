@@ -15,7 +15,6 @@
             "data": ["Test Case 1 (Hello World\\n)", "Test Case 2 (32 bytes of random)"] }
     ],
     // TODO: make the output transitions happen right before a rising clock instead of right after one
-    // TODO: add "computation occuring", "inputs sampled" text, "<info about data in/out source>"
     "head": {
         "text": "eaglesong_digest_top Usage - Example 1",
         // "tick": 0,

@@ -1,15 +1,19 @@
 # Eaglesong Verilog Specification
 
+<!-- Render to PDF with: `pandoc --number-sections --shift-heading-level-by=-1 SPECIFICATION.md -o eaglesong-verilog-spec.pdf` -->
+
+This document is best viewed online at:
+
+> [https://github.com/DeflateAwning/eaglesong-verilog/blob/implement1/SPECIFICATION.md](https://github.com/DeflateAwning/eaglesong-verilog/blob/implement1/SPECIFICATION.md)
+
 ## Algorithm Specification
 
 The Eaglesong hash algorithm/function is defined and implemented in the
-[Nervos Network's Requestion for Comments repo](https://github.com/nervosnetwork/rfcs). RFC 0010 defines the Eaglesong
-hash algorithm:
+[Nervos Network's Request for Comments repo](https://github.com/nervosnetwork/rfcs).
+[RFC 0010](https://github.com/nervosnetwork/rfcs/tree/master/rfcs/0010-eaglesong) defines the Eaglesong
+hash algorithm.
 
--   [link to forked spec permalink](https://github.com/nervosnetwork/rfcs/tree/dff5235616e5c7aec706326494dce1c54163c4be/rfcs/0010-eaglesong),
--   [link to master](https://github.com/nervosnetwork/rfcs/tree/master/rfcs/0010-eaglesong).
-
-Eaglesong is a marketted as a cryptographic hash algorithm, but has limitted use in actual cryptographic applications.
+Eaglesong is a marketed as a cryptographic hash algorithm, but has limited use in actual cryptographic applications.
 In security-critical applications, its applicability should be further evaluated.
 
 ## Warnings and Limitations
@@ -59,6 +63,10 @@ The following are parameters which _could_ be changed in the future, should para
 The `eaglesong_digest_top` module processes input data to generate a cryptographic hash using the Eaglesong algorithm.
 This section outlines the key aspects of its operation.
 
+### Example Timing Diagram
+
+![A timing diagram showing example usage, calculating two hashes in succession](./docs/wavedrom_top_1.svg)
+
 ### Data Flow
 
 Input data is provided through the `input_val` port, along with the corresponding `input_length_bytes` specifying the
@@ -104,7 +112,7 @@ serial-to-parallel converter.
 
 ## System Architecture
 
-The overall block instaniation pattern of nesting is as follows:
+The overall block instantiation pattern of nesting is as follows:
 
 -   `eaglesong_digest_top`
     -   `eaglesong_absorb_comb`
@@ -144,7 +152,7 @@ Both tests display a total success/failure rate at the end of execution.
 
 ## Synthesis
 
-This design is likely not synthesizable. Welp.
+This design is likely not synthesizable.
 
 If it were, this section would comment on the following aspects:
 
@@ -157,7 +165,6 @@ In order to make this design synthesizable, more consideration should be put int
 1. Limit the number of lookup tables, especially as related to the `injection_constants` storage.
 2. Verify timing constraints.
 3. Verify the initial values of the top-level system.
-4.
 
 ## Next Steps for Optimization
 

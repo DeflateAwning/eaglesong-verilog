@@ -28,5 +28,13 @@
     },
     "spellright.ignoreRegExpsByClass": {
         "mdx": ["/&amp;/g", "/&nbsp;/g", "/&mdash;/g", "/&gt;/g", "/&lt;/g"]
+    },
+    "cSpell.customDictionaries": {
+        "custom-dictionary-workspace": {
+            "name": "custom-dictionary-workspace",
+            "path": "${workspaceFolder:eaglesong-verilog}/.cspell/custom-dictionary-workspace.txt",
+            "addWords": true,
+            "scope": "workspace"
+        }
     }
 }

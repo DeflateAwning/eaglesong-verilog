@@ -3,6 +3,7 @@
         "esbenp.prettier-vscode",
         "ban.spellright",
         "unifiedjs.vscode-mdx",
-        "bmpenuelas.waveform-render"
+        "bmpenuelas.waveform-render",
+        "streetsidesoftware.code-spell-checker"
     ]
 }

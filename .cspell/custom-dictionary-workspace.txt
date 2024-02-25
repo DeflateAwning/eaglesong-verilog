@@ -1,0 +1,10 @@
+# Custom Dictionary Words
+bitmatrix
+combinational
+Eaglesong
+iverilog
+Nervos
+pandoc
+synthesizable
+Verilator
+Verilog
