@@ -4,6 +4,7 @@
         "ban.spellright",
         "unifiedjs.vscode-mdx",
         "bmpenuelas.waveform-render",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "mshr-h.veriloghdl"
     ]
 }
