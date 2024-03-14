@@ -27,14 +27,14 @@ module eaglesong_permutation(
 
     wire [31:0] addrotadd_step_intermed1 [7:0];
 
-
     // const_bit_matrix generated with Python:
         // a = <paste in the bit_matrix[] array from the C code as list> # // Source: https://github.com/nervosnetwork/rfcs/blob/dff5235616e5c7aec706326494dce1c54163c4be/rfcs/0010-eaglesong/eaglesong.c#L4
         // arev = reversed(a)
         // trev = ''
         // for i in arev: trev += str(i)
         // print(hex(int(trev, 2)))
-    reg [255:0] const_bit_matrix = 256'hc7d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
+    reg [255:0] const_bit_matrix;
+    assign const_bit_matrix = 256'hc7d7643c321e190fcb50a5a892d4896a84b5458de511755ffd78bebc9f5e8faf;
     reg [4:0] const_coefficients [47:0];
     reg [31:0] const_injections [687:0];
 
@@ -201,24 +201,23 @@ module eaglesong_permutation(
     // assign the bit_matrix stage (combinationally)
     generate
         for (j = 0; j < 16; j=j+1) begin // j = matrix column number
-            byte j_byte = j;
             assign bitmatrix_step_output_state[j] = (
-                    (( {32{const_bit_matrix[8'h00 | j_byte]}}) & state_input_store[4'h0]) ^
-                    (( {32{const_bit_matrix[8'h10 | j_byte]}}) & state_input_store[4'h1]) ^
-                    (( {32{const_bit_matrix[8'h20 | j_byte]}}) & state_input_store[4'h2]) ^
-                    (( {32{const_bit_matrix[8'h30 | j_byte]}}) & state_input_store[4'h3]) ^
-                    (( {32{const_bit_matrix[8'h40 | j_byte]}}) & state_input_store[4'h4]) ^
-                    (( {32{const_bit_matrix[8'h50 | j_byte]}}) & state_input_store[4'h5]) ^
-                    (( {32{const_bit_matrix[8'h60 | j_byte]}}) & state_input_store[4'h6]) ^
-                    (( {32{const_bit_matrix[8'h70 | j_byte]}}) & state_input_store[4'h7]) ^
-                    (( {32{const_bit_matrix[8'h80 | j_byte]}}) & state_input_store[4'h8]) ^
-                    (( {32{const_bit_matrix[8'h90 | j_byte]}}) & state_input_store[4'h9]) ^
-                    (( {32{const_bit_matrix[8'hA0 | j_byte]}}) & state_input_store[4'hA]) ^
-                    (( {32{const_bit_matrix[8'hB0 | j_byte]}}) & state_input_store[4'hB]) ^
-                    (( {32{const_bit_matrix[8'hC0 | j_byte]}}) & state_input_store[4'hC]) ^
-                    (( {32{const_bit_matrix[8'hD0 | j_byte]}}) & state_input_store[4'hD]) ^
-                    (( {32{const_bit_matrix[8'hE0 | j_byte]}}) & state_input_store[4'hE]) ^
-                    (( {32{const_bit_matrix[8'hF0 | j_byte]}}) & state_input_store[4'hF])
+                    (( {32{const_bit_matrix[8'h00 | j]}}) & state_input_store[4'h0]) ^
+                    (( {32{const_bit_matrix[8'h10 | j]}}) & state_input_store[4'h1]) ^
+                    (( {32{const_bit_matrix[8'h20 | j]}}) & state_input_store[4'h2]) ^
+                    (( {32{const_bit_matrix[8'h30 | j]}}) & state_input_store[4'h3]) ^
+                    (( {32{const_bit_matrix[8'h40 | j]}}) & state_input_store[4'h4]) ^
+                    (( {32{const_bit_matrix[8'h50 | j]}}) & state_input_store[4'h5]) ^
+                    (( {32{const_bit_matrix[8'h60 | j]}}) & state_input_store[4'h6]) ^
+                    (( {32{const_bit_matrix[8'h70 | j]}}) & state_input_store[4'h7]) ^
+                    (( {32{const_bit_matrix[8'h80 | j]}}) & state_input_store[4'h8]) ^
+                    (( {32{const_bit_matrix[8'h90 | j]}}) & state_input_store[4'h9]) ^
+                    (( {32{const_bit_matrix[8'hA0 | j]}}) & state_input_store[4'hA]) ^
+                    (( {32{const_bit_matrix[8'hB0 | j]}}) & state_input_store[4'hB]) ^
+                    (( {32{const_bit_matrix[8'hC0 | j]}}) & state_input_store[4'hC]) ^
+                    (( {32{const_bit_matrix[8'hD0 | j]}}) & state_input_store[4'hD]) ^
+                    (( {32{const_bit_matrix[8'hE0 | j]}}) & state_input_store[4'hE]) ^
+                    (( {32{const_bit_matrix[8'hF0 | j]}}) & state_input_store[4'hF])
                 );
         end
     endgenerate
@@ -226,7 +225,6 @@ module eaglesong_permutation(
     // circulant multiplication stage
     generate
         for (j = 0; j < 16; j++) begin
-            // byte j_byte = j;
             assign circulant_step_output_state[j] = (
                                 (bitmatrix_step_output_state[j])  ^  
                                 (bitmatrix_step_output_state[j] << const_coefficients[3*j+1]) ^
@@ -263,8 +261,8 @@ module eaglesong_permutation(
         end
     endgenerate
 
+    /***
     initial begin
-        /*
         $monitor("Time=%d, round_num=%d,\nbitmatrix_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ncirculant_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ninjection_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\naddrotadd_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
             $time, round_num_store,
             bitmatrix_step_output_state[0], bitmatrix_step_output_state[1], bitmatrix_step_output_state[2],
@@ -295,7 +293,10 @@ module eaglesong_permutation(
             addrotadd_step_output_state[12], addrotadd_step_output_state[13], addrotadd_step_output_state[14],
             addrotadd_step_output_state[15]
         );
-        */
     end
+    *****/
+
+    /// VERIFICATION ///
+    assert property (round_num <= 42);
 
 endmodule
