@@ -8,7 +8,7 @@ set -e
 verilator --version
 
 # verilator --trace -I../rtl/ -cc ../tb/tb_eaglesong_digest_top.sv ../rtl/eaglesong_digest_top.sv --exe ../tb_verilator/tb_eaglesong_digest_top.cpp --timing
-verilator --trace -I../rtl/ -cc ../rtl/eaglesong_digest_top.sv --exe ../tb_verilator/tb_eaglesong_digest_top.cpp --timing
+verilator --trace -I../rtl/ -cc ../rtl/eaglesong_digest_top.sv --exe ../tb_verilator/tb_eaglesong_digest_top.cpp ../tb_verilator/eaglesong_reference.c  --timing
 echo "=== Done verilator generation ==="
 
 # make -C obj_dir/ -fVeaglesong_digest_top.mk

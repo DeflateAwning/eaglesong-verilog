@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "esbenp.prettier-vscode",
-        "ban.spellright",
         "unifiedjs.vscode-mdx",
         "bmpenuelas.waveform-render",
         "streetsidesoftware.code-spell-checker",

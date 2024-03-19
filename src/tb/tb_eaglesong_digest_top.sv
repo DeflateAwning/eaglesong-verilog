@@ -65,11 +65,11 @@ module tb_eaglesong_digest_top(
     endtask
 
     //----------------------------------------------------------------
-    // Main Test Task #1
+    // Main Test Task #0
     // Run digest for the 'Hello, world!\n' test.
     //----------------------------------------------------------------
     int calc_clk_count = 0;
-    task main_test_task_str1; begin
+    task main_test_task_str0; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test (literally, that text)
@@ -99,7 +99,7 @@ module tb_eaglesong_digest_top(
         // PYTHON: c = reversed(b)
         // PYTHON: print("256'h" + ''.join(c))
         if (output_val !== 256'hD6727D073CE7EC1ECA9F52DBD0E4954B3F4DCB6B0B43C25D6162D141247E8664) begin
-            $error("Assertion failed: final output of main_test_task_str1 is wrong");
+            $error("Assertion failed: final output of main_test_task_str0 is wrong");
             tb_error_cnt = tb_error_cnt + 1;
         end
 
@@ -123,7 +123,7 @@ module tb_eaglesong_digest_top(
 
         init_task();
 
-        main_test_task_str1();
+        main_test_task_str0();
         // TODO: add more test cases, including different round numbers
 
         if (tb_error_cnt !== 0)

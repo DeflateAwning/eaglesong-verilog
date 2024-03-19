@@ -297,6 +297,8 @@ module eaglesong_permutation(
     *****/
 
     /// VERIFICATION ///
-    assert property (round_num <= 42);
+    always @(*) begin
+        assert (round_num <= 42) else $error("round_num is greater than 42");
+    end
 
 endmodule

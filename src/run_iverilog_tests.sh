@@ -3,6 +3,8 @@
 # halt if any stage's exit code is not 0
 set -e
 
+# FIXME: these tests are failing because there are some XXXX values creeping in
+
 # Print the version of the tools used
 iverilog -V 2>/dev/null | head -n 1
 
