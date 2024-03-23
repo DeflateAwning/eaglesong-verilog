@@ -4,4 +4,6 @@
 # verilator build products
 *.vcd
 **/obj_dir/
-# TODO: confirm if we want to ignore obj_dir
+
+# gtkwave temp files/helper files
+*.gtkw

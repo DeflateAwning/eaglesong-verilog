@@ -51,7 +51,7 @@ uint8_t run_full_test(const uint8_t input_vals[], uint32_t input_length_bytes, c
     sprintf(waveform_file_name, "waveform_%s.vcd", test_name);
     m_trace->open(waveform_file_name);
 
-    printf("========== STARTING TEST %s ======================\n", test_name);
+    printf("\n\n\n========== STARTING TEST %s ======================\n", test_name);
 
     ////////////
     tick();
@@ -120,12 +120,19 @@ uint8_t run_full_test(const uint8_t input_vals[], uint32_t input_length_bytes, c
 
     printf("========== ^^ RESULTS OF TEST %s ======================\n", test_name);
 
+    uint32_t ret_val = 0;
     for (int i = 0; i < 8; i++) {
         if (dut->output_val[i] != expected_output_funky[i]) {
             printf("ERROR: output_val[%d] is not as expected. Got %08X, expected %08X.\n", i, dut->output_val[i], expected_output_funky[i]);
-            return 100;
+            ret_val = 100;
         }
     }
+
+    // must call before we return, otherwise the trace isn't saved
+    m_trace->close();
+    delete dut;
+    
+    if (ret_val > 0) return ret_val;
 
     if (sim_time >= MAX_SIM_TIME) {
         printf("LOG: ending because sim_time>=MAX_SIM_TIME.\n");
@@ -136,9 +143,6 @@ uint8_t run_full_test(const uint8_t input_vals[], uint32_t input_length_bytes, c
         printf("LOG: ending because sim_time>=150.\n");
         return 2;
     }
-
-    m_trace->close();
-    delete dut;
     
     return 0;
 }

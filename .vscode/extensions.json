@@ -4,6 +4,7 @@
         "unifiedjs.vscode-mdx",
         "bmpenuelas.waveform-render",
         "streetsidesoftware.code-spell-checker",
-        "mshr-h.veriloghdl"
+        "mshr-h.veriloghdl",
+        "gruntfuggly.todo-tree"
     ]
 }

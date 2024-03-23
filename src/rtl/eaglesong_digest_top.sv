@@ -14,18 +14,15 @@ module eaglesong_digest_top(
         output eval_output_ready
     );
 
-    // Pseudo-FSM Plan, roughly:
-    // FSM_STATE_ALL_PERMS_0:
-        // * init state as all zeros
-        // * absorb.state_input <= state
-        // * perms.state_input <= absorb.state_output (absorb_state_out)
-        // * absorb_round_num <= 8'b0;
-        // When ready, then state <= perms_state_output
-    // FSM_STATE_ALL_PERMS_1:
-        // * absorb.state_input <= state
-        // * perms.state_input <= absorb.state_output (absorb_state_out)
-        // * absorb_round_num <= 8'b0;
-        // When ready, then state <= perms_state_output
+    // FSM states enum
+    typedef enum logic [2:0] {
+        STATE_00_STARTING,
+        STATE_10_PERMS1_GOING,
+        STATE_20_PERMS1_DONE,
+        STATE_30_PERMS2_GOING,
+        STATE_40_ALL_DONE} state_enum_t;
+    state_enum_t cur_fsm_state;
+    state_enum_t next_fsm_state;
 
     genvar i;
     genvar j;
@@ -84,32 +81,28 @@ module eaglesong_digest_top(
         end
     endgenerate
 
-    // handle start_eval case: copy state_input to state (for every index)
+    // handle: copy perms_state_output to state
     generate
         for (i = 0; i < 16; i++) begin : gen_state_copy
             always_ff @(posedge clk) begin
-                if (start_eval == 1'b1) begin
-                    // any value works, just needs to be set to something for
-                    // input to absorb stage via absorb_state_input_slice
-                    state[i] <= 32'h0;
-
-                    // init the output register (probably not necessary)
-                    // perms_state_output[i] <= 32'h0;
-                end
-                else if (start_eval == 1'b0) begin
+                if (cur_fsm_state == STATE_20_PERMS1_DONE || cur_fsm_state == STATE_40_ALL_DONE) begin
                     if (perms_eval_output_ready == 1'b1) begin
                         // data's ready, store it
                         state[i] <= perms_state_output[i];
                     end
                 end
+                else if (cur_fsm_state == STATE_00_STARTING) begin
+                    // act as a reset
+                    state[i] <= 32'h0;
+                end
+                // else: keep the current state value
             end
         end
     endgenerate
 
     // handle start_eval case: non-generate part
     always_ff @(posedge clk) begin
-        if (start_eval == 1'b1) begin
-            absorb_round_num <= 8'b0;
+        if (cur_fsm_state == STATE_00_STARTING) begin // triggered by start_eval=1
             eval_output_ready_reg <= 1'b0; // not ready
 
             // store the inputs
@@ -119,22 +112,36 @@ module eaglesong_digest_top(
 
             // trigger starting the calculation
             perms_start_eval <= 1'b1;
+
+            absorb_round_num <= 8'd0; // 0th round
         end
 
-        else if (start_eval == 1'b0) begin
-            perms_start_eval <= 1'b0;
+        else if (cur_fsm_state == STATE_10_PERMS1_GOING) begin
+            if (next_fsm_state == STATE_20_PERMS1_DONE) perms_start_eval <= 1'b1;
+            else perms_start_eval <= 1'b0;
 
-            if ((eval_output_ready_reg == 1'b0) && (perms_eval_output_ready == 1'b1)) begin
-                // NOT start_eval && block's output not set to ready yet && current perms block is done
-                if (absorb_round_num == 8'h0) begin
-                    eval_output_ready_reg <= 1'b0; // mark as output not ready
-                    absorb_round_num <= absorb_round_num + 1;
-                end
-                else begin
-                    // final output is ready
-                    eval_output_ready_reg <= 1'b1; // mark as output ready
-                end
-            end
+            eval_output_ready_reg <= 1'b0; // not ready
+            absorb_round_num <= 8'd0; // 0th round
+        end
+
+        else if (cur_fsm_state == STATE_20_PERMS1_DONE) begin
+            perms_start_eval <= 1'b1;
+
+            eval_output_ready_reg <= 1'b0; // not ready
+            absorb_round_num <= 8'd1; // next round
+        end
+
+        else if (cur_fsm_state == STATE_30_PERMS2_GOING) begin
+            if (next_fsm_state == STATE_40_ALL_DONE) perms_start_eval <= 1'b1;
+            else perms_start_eval <= 1'b0;
+
+            eval_output_ready_reg <= 1'b0; // not ready
+            absorb_round_num <= 8'd1; // next round
+        end
+
+        else if (cur_fsm_state == STATE_40_ALL_DONE) begin
+            eval_output_ready_reg <= 1'b1; // FINALLY READY!
+            absorb_round_num <= 8'd1; // next round
         end
     end
 
@@ -150,9 +157,58 @@ module eaglesong_digest_top(
     // assign output registers to output wires/ports
     assign eval_output_ready = eval_output_ready_reg;
 
+    // clocked next state transition
+    always_ff @(posedge clk) begin
+        if (start_eval == 1'b1) begin
+            cur_fsm_state <= STATE_00_STARTING;
+        end
+        else begin
+            cur_fsm_state <= next_fsm_state;
+        end
+    end
+
+    // next state logic
+    always_comb begin : next_fsm_state_logic
+        case (cur_fsm_state)
+            STATE_00_STARTING:
+                // always move on
+                next_fsm_state = STATE_10_PERMS1_GOING;
+
+            STATE_10_PERMS1_GOING: begin
+                if (perms_eval_output_ready == 1'b1) begin
+                    next_fsm_state = STATE_20_PERMS1_DONE;
+                end
+                else begin
+                    next_fsm_state = STATE_10_PERMS1_GOING; // stay
+                end
+            end
+
+            STATE_20_PERMS1_DONE: begin
+                if (input_length_bytes_store == 32) begin
+                    next_fsm_state = STATE_30_PERMS2_GOING;
+                end
+                else begin
+                    next_fsm_state = STATE_40_ALL_DONE;
+                end
+            end
+
+            STATE_30_PERMS2_GOING: begin
+                if (perms_eval_output_ready == 1'b1) begin
+                    next_fsm_state = STATE_40_ALL_DONE;
+                end
+                else begin
+                    next_fsm_state = STATE_30_PERMS2_GOING; // stay
+                end
+            end
+
+            // STATE_40_ALL_DONE: <stay in current state>
+            default: next_fsm_state = cur_fsm_state; // default: stay in current state
+        endcase
+    end : next_fsm_state_logic
+
     initial begin
-        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nabsorb_state_out[0,1,6,7]=%h %h ... %h %h,\nperms_state_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h, absorb_round_num=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h\neval_output_ready=%h, output_val=%h\n",
-            $time, input_val_store, input_length_bytes_store, input_length_bytes_store,
+        $monitor("Time=%5d, fsm=%2d (->%2d),\ninput_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nabsorb_state_out[0,1,6,7]=%h %h ... %h %h,\nperms_state_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h, absorb_round_num=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h\neval_output_ready=%h, output_val=%h\n",
+            $time, cur_fsm_state, next_fsm_state, input_val_store, input_length_bytes_store, input_length_bytes_store,
             state[0], state[1], state[14], state[15],
             absorb_state_out[0], absorb_state_out[1], absorb_state_out[6], absorb_state_out[7],
             perms_state_input[0], perms_state_input[1], perms_state_input[14], perms_state_input[15],
