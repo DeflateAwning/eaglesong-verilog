@@ -57,12 +57,13 @@ module eaglesong_all_permutations(
             // handle each clock by incrementing the round_num and setting eval_output_ready_reg
             if (eval_output_ready_reg == 1'b0) begin
                 // state <= perm_state_output; // moved to separate generate block
-                if (round_num <= 6'd41) begin
+                if (round_num <= 6'd42) begin // needs 43 rounds to include one propagation delay
                     eval_output_ready_reg <= 1'b0; // mark as output not ready
                     round_num <= round_num + 1;
                 end
-                else if (round_num == 6'd42) begin
+                else if (round_num == 6'd43) begin
                     eval_output_ready_reg <= 1'b1; // mark as output ready
+                    round_num <= round_num + 1; // increase it one more so that next time, it doesn't do anything
                 end
             end
         end
@@ -72,7 +73,7 @@ module eaglesong_all_permutations(
     generate
         for (i = 0; i < 16; i++) begin : gen_state_output_hold
             always_ff @(posedge clk) begin
-                if (round_num == 6'd42) begin
+                if (round_num == 6'd43) begin
                     state_output_hold_reg[i] <= state[i];
                 end
             end
@@ -86,14 +87,6 @@ module eaglesong_all_permutations(
         end
     endgenerate
     assign eval_output_ready = eval_output_ready_reg;
-
-    // Error check, just for fun
-    always @(posedge clk) begin
-        if (round_num > 6'd42) begin
-            $error("In eaglesong_all_permutations, round_num has an invalid value (must be <=42).");
-            $finish;
-        end
-    end
 
     initial begin
         /*

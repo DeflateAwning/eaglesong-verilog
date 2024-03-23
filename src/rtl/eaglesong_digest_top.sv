@@ -151,11 +151,11 @@ module eaglesong_digest_top(
     assign eval_output_ready = eval_output_ready_reg;
 
     initial begin
-        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nstate_absorb_comb_out[0,1,6,7]=%h %h ... %h %h,\nstate_all_perm_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h, absorb_round_num=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h\neval_output_ready=%h, output_val=%h\n",
+        $monitor("Time=%d, input_val_store=%h,\ninput_length_bytes_store=%h=%d,\nstate[0,1,14,15]=%h %h ... %h %h,\nabsorb_state_out[0,1,6,7]=%h %h ... %h %h,\nperms_state_input[0,1,14,15] = %h %h ... %h %h,\nperms_start_eval=%h, absorb_round_num=%h,\nperms_eval_output_ready=%h, perms_state_output[0,1,14,15]=%h %h ... %h %h\neval_output_ready=%h, output_val=%h\n",
             $time, input_val_store, input_length_bytes_store, input_length_bytes_store,
             state[0], state[1], state[14], state[15],
             absorb_state_out[0], absorb_state_out[1], absorb_state_out[6], absorb_state_out[7],
-            perms_state_input[0], perms_state_input[1], perms_state_input[14], perms_state_input[15], 
+            perms_state_input[0], perms_state_input[1], perms_state_input[14], perms_state_input[15],
             perms_start_eval, absorb_round_num,
             perms_eval_output_ready, perms_state_output[0], perms_state_output[1], perms_state_output[14], perms_state_output[15],
             eval_output_ready,

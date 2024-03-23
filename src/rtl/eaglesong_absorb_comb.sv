@@ -12,7 +12,8 @@ module eaglesong_absorb_comb(
         // must be 1 <= input_length_bytes <= 32, and is the number of bits in the input_val to be used
         input [6:0] input_length_bytes,
 
-        input [7:0] absorb_round_num, // TODO: realistically is only 0 or 1 with our input_length_bytes restriction to 32 bytes
+        // TODO: realistically is only 0 or 1 with our input_length_bytes restriction to 32 bytes
+        input [7:0] absorb_round_num,
 
         // only the lower 8 elements are modified in this block
         output [31:0] state_output [7:0]
