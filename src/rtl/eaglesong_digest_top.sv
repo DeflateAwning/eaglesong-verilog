@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`default_nettype none
 
 module eaglesong_digest_top(
         input clk,
@@ -45,7 +46,7 @@ module eaglesong_digest_top(
     wire [31:0] absorb_state_out [7:0];
     wire [31:0] perms_state_input [15:0];
     wire perms_eval_output_ready;
-    
+
     // Output Value Storage
     reg eval_output_ready_reg;
 
@@ -70,7 +71,7 @@ module eaglesong_digest_top(
     // assign absorb_state_input_slice[7:0] = state[7:0]
     // assign perms_state_input[7:0] = absorb_state_out[7:0]
     generate
-        for (i = 0; i <= 7; i++) begin
+        for (i = 0; i <= 7; i++) begin : gen_assign_0to7
             assign absorb_state_input_slice[i] = state[i];
             assign perms_state_input[i] = absorb_state_out[i];
         end
@@ -78,14 +79,14 @@ module eaglesong_digest_top(
 
     // assign perms_state_input[15:8] = 32'h0
     generate
-        for (i = 8; i <= 15; i++) begin
+        for (i = 8; i <= 15; i++) begin : gen_assign_8to15
             assign perms_state_input[i] = 32'h0;
         end
     endgenerate
 
     // handle start_eval case: copy state_input to state (for every index)
     generate
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 16; i++) begin : gen_state_copy
             always_ff @(posedge clk) begin
                 if (start_eval == 1'b1) begin
                     // any value works, just needs to be set to something for
@@ -119,7 +120,7 @@ module eaglesong_digest_top(
             // trigger starting the calculation
             perms_start_eval <= 1'b1;
         end
-        
+
         else if (start_eval == 1'b0) begin
             perms_start_eval <= 1'b0;
 
@@ -139,8 +140,8 @@ module eaglesong_digest_top(
 
     // assign the state-to-output_val squeeze conversion
     generate
-        for (j = 0; j < 8; j++) begin // j < rate/32=8
-            for (k = 0; k < 4; k++) begin
+        for (j = 0; j < 8; j++) begin : gen_state_to_output_calc_j // j < rate/32=8
+            for (k = 0; k < 4; k++) begin : gen_state_to_output_calc_k
                 assign output_val[((j << 2) | k)*8 +: 8] = state[j][k << 3 +: 8];
             end
         end

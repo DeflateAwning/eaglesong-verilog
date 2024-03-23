@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`default_nettype none
 
 module eaglesong_all_permutations(
         input clk,
@@ -30,7 +31,7 @@ module eaglesong_all_permutations(
 
     // handle start_eval case: copy state_input to state (for every index)
     generate
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 16; i++) begin : gen_state_copy
             always_ff @(posedge clk) begin
                 if (start_eval == 1'b1) begin
                     state[i] <= state_input[i];
@@ -69,7 +70,7 @@ module eaglesong_all_permutations(
 
     // when it's complete, copy "state" to "state_output_hold_reg"
     generate
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 16; i++) begin : gen_state_output_hold
             always_ff @(posedge clk) begin
                 if (round_num == 6'd42) begin
                     state_output_hold_reg[i] <= state[i];
@@ -80,12 +81,12 @@ module eaglesong_all_permutations(
 
     // assign output registers to output wires/ports
     generate
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 16; i++) begin : gen_assign_output
             assign state_output[i] = state_output_hold_reg[i];
         end
     endgenerate
     assign eval_output_ready = eval_output_ready_reg;
-    
+
     // Error check, just for fun
     always @(posedge clk) begin
         if (round_num > 6'd42) begin

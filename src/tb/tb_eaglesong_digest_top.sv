@@ -8,10 +8,10 @@ module tb_eaglesong_digest_top(
     //----------------------------------------------------------------
     // Internal constant and parameter definitions.
     //----------------------------------------------------------------
-    parameter DEBUG = 0;
+    parameter byte DEBUG = 0;
 
-    parameter CLK_HALF_PERIOD = 2;
-    parameter CLK_PERIOD = 2 * CLK_HALF_PERIOD;
+    parameter byte CLK_HALF_PERIOD = 2;
+    parameter byte CLK_PERIOD = 2 * CLK_HALF_PERIOD;
 
 
     //----------------------------------------------------------------
@@ -53,7 +53,7 @@ module tb_eaglesong_digest_top(
     //     tb_clk = !tb_clk;
     // end // clk_gen
 
-    task init_task;
+    task automatic init_task;
         begin
             // for fun, not really needed because we set it later
             input_val = 256'h0;
@@ -69,7 +69,7 @@ module tb_eaglesong_digest_top(
     // Run digest for the 'Hello, world!\n' test.
     //----------------------------------------------------------------
     int calc_clk_count = 0;
-    task main_test_task_str0; begin
+    task automatic main_test_task_str0; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test (literally, that text)
@@ -87,7 +87,7 @@ module tb_eaglesong_digest_top(
             #(CLK_PERIOD);
             calc_clk_count ++;
         end
-        
+
         if (eval_output_ready !== 1'b1) begin
             $error("Assertion failed: eval_output_ready !== 1'b1 after too long.");
             tb_error_cnt = tb_error_cnt + 1;
@@ -132,7 +132,6 @@ module tb_eaglesong_digest_top(
             $display(" --- Done tb_eaglesong_digest_top -> main(). No errors.");
 
         $finish;
-    
     end // main()
 
 endmodule

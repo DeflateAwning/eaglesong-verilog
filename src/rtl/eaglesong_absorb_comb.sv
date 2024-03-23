@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`default_nettype none
 
 module eaglesong_absorb_comb(
         // NOTE: state[15:8] not used/modified, and thus aren't passed
@@ -12,7 +13,7 @@ module eaglesong_absorb_comb(
         input [6:0] input_length_bytes,
 
         input [7:0] absorb_round_num, // TODO: realistically is only 0 or 1 with our input_length_bytes restriction to 32 bytes
-        
+
         // only the lower 8 elements are modified in this block
         output [31:0] state_output [7:0]
     );
@@ -44,20 +45,20 @@ module eaglesong_absorb_comb(
     assign input_length_bytes_store = input_length_bytes;
     assign absorb_round_num_store = absorb_round_num;
     generate
-        for (i = 0; i < 8; i++) begin
+        for (i = 0; i < 8; i++) begin : gen_state_input_copy
             assign state_input_store[i][31:0] = state_input[i][31:0];
         end
     endgenerate
-    
+
     generate
-        for (j = 0; j < 8; j++) begin // rate/32 = 256/32 = 8
-            for (k = 0; k < 4; k++) begin // k=0,1,2,3
+        for (j = 0; j < 8; j++) begin : gen_j // rate/32 = 256/32 = 8
+            for (k = 0; k < 4; k++) begin : gen_k // k=0,1,2,3
                 // const uint32_t iratejk_const = {absorb_round_num[0], j[2:0], k[1:0]  } = (absorb_round_num << 5) | (j << 2) | k;
-                
+
                 // assign iratejk_const[j << 2 | k] = (absorb_round_num_store << 5) | (j << 2) | k;
                 assign iratejk_const[j << 2 | k][5:0] = {absorb_round_num_store[0], j[2:0], k[1:0]};
 
-                if (k == 0) begin
+                if (k == 0) begin : gen_k_is_0
                     //// SYNTAX TYPE 1 ////
                     // if ( {1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0] )
                     //     assign absorb_state_modifier[(j << 2) | k][31:0] = input_val_store[iratejk_const[j << 2 | k][5:0]];
@@ -69,22 +70,22 @@ module eaglesong_absorb_comb(
 
                     ///// SYNTAX TYPE 2 /////
                     assign absorb_state_modifier[(j << 2) | k][31:0] = (
-                                ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ?
-                                    {
-                                        24'h0,
-                                        input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8]
-                                    } : (
-                                        ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ?
-                                            32'h06 : 32'h0
-                                    )
-                            );
+                            ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ?
+                                {
+                                    24'h0,
+                                    input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8]
+                                } : (
+                                    ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ?
+                                        32'h06 : 32'h0
+                                )
+                        );
 
                     ///// TESTING ///////
                     // assign absorb_state_modifier[(j << 2) | k][31:0] = 32'h0;
 
                     // NOTE: we can update the C model to match this better if we want
                 end
-                else begin
+                else begin : gen_k_not_0
                     //// SYNTAX TYPE 1 ////
                     // if ( {1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0] )
                     //     assign absorb_state_modifier[(j << 2) | k][31:0] = (absorb_state_modifier[(j << 2) | (k - 1)] << 8) ^ input_val_store[iratejk_const[j << 2 | k][5:0]];
@@ -96,18 +97,17 @@ module eaglesong_absorb_comb(
 
                     //// SYNTAX TYPE 2 ////
                     assign absorb_state_modifier[(j << 2) | k][31:0] = (
-                                ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ? 
-                                    
-                                    // ex2 = ex1[sel*4 +:4]; // vector[LSB+:width]
-                                    {
-                                        absorb_state_modifier[(j << 2) | (k - 1)][23:0],
-                                        input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8]
-                                    } : (
-                                        ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ? 
-                                            {absorb_state_modifier[(j << 2) | (k - 1)][23:0], 8'h06} : // 8'h06 is the delim
-                                            absorb_state_modifier[(j << 2) | (k - 1)]
-                                    )
-                            );
+                            ({1'b0, iratejk_const[j << 2 | k][5:0]} < input_length_bytes_store[6:0]) ? 
+                                // ex2 = ex1[sel*4 +:4]; // vector[LSB+:width]
+                                {
+                                    absorb_state_modifier[(j << 2) | (k - 1)][23:0],
+                                    input_val_store[iratejk_const[j << 2 | k][5:0]*8 +: 8]
+                                } : (
+                                    ({1'b0, iratejk_const[j << 2 | k][5:0]} == input_length_bytes_store[6:0]) ? 
+                                        {absorb_state_modifier[(j << 2) | (k - 1)][23:0], 8'h06} : // 8'h06 is the delim
+                                        absorb_state_modifier[(j << 2) | (k - 1)]
+                                )
+                        );
 
                     //// Testing ////
                     // assign absorb_state_modifier[(j << 2) | k][31:0] = 
@@ -120,7 +120,7 @@ module eaglesong_absorb_comb(
 
             assign next_state_output[j] =
                     (
-                        state_input_store[j][31:0] & 
+                        state_input_store[j][31:0] &
                             {32{ (| absorb_round_num_store[7:0])}}
                     ) ^ absorb_state_modifier[(j << 2) | 3][31:0]; // force k=3 for latest, 32-bit XOR
 
@@ -133,7 +133,7 @@ module eaglesong_absorb_comb(
 
     // pass output through
     generate
-        for (i = 0; i < 8; i++) begin
+        for (i = 0; i < 8; i++) begin : gen_assign_output
             assign state_output[i] = next_state_output[i];
         end
     endgenerate
@@ -160,7 +160,7 @@ module eaglesong_absorb_comb(
             // for j in range(8):
             //     for k in range(4):
             //         print(f"absorb_state_modifier[{(j<<2)|k}],", end=('\n' if k == 3 else ' '))
-            
+
             absorb_state_modifier[0], absorb_state_modifier[1], absorb_state_modifier[2], absorb_state_modifier[3],
             absorb_state_modifier[4], absorb_state_modifier[5], absorb_state_modifier[6], absorb_state_modifier[7],
             absorb_state_modifier[8], absorb_state_modifier[9], absorb_state_modifier[10], absorb_state_modifier[11],

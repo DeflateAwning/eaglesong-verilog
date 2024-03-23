@@ -6,11 +6,10 @@ module tb_eaglesong_absorb_comb;
     //----------------------------------------------------------------
     // Internal constant and parameter definitions.
     //----------------------------------------------------------------
-    parameter DEBUG = 0;
+    parameter byte DEBUG = 0;
 
-    parameter CLK_HALF_PERIOD = 2;
-    parameter CLK_PERIOD = 2 * CLK_HALF_PERIOD;
-
+    parameter byte CLK_HALF_PERIOD = 2;
+    parameter byte CLK_PERIOD = 2 * CLK_HALF_PERIOD;
 
     //----------------------------------------------------------------
     // Register and Wire declarations.
@@ -50,7 +49,7 @@ module tb_eaglesong_absorb_comb;
         tb_clk = !tb_clk;
     end // clk_gen
 
-    task init_task;
+    task automatic init_task;
         begin
             // must be set to some values, but is ignored when absorb_round_num == 0
             state_input[0] <= 32'h00000000;
@@ -76,7 +75,7 @@ module tb_eaglesong_absorb_comb;
     // input_length = 14; (this str only does 1 round)
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round0; begin
+    task automatic main_test_task_str1_round0; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test (literally, that text)
@@ -122,9 +121,9 @@ module tb_eaglesong_absorb_comb;
     // input_length = 32;
     // state_input is the result of input=[33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240] (str2)
     //----------------------------------------------------------------
-    task main_test_task_str2_round0; begin
+    task automatic main_test_task_str2_round0; begin
         #(CLK_PERIOD*2);
-        
+
         // PYTHON: a = [33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240]
         // PYTHON: arev = reversed(a)
         // PYTHON: arev = [f"{i:02X}" for i in arev]
@@ -154,9 +153,9 @@ module tb_eaglesong_absorb_comb;
     end
     endtask
 
-    task main_test_task_str2_round1; begin
+    task automatic main_test_task_str2_round1; begin
         #(CLK_PERIOD*2);
-        
+
         // PYTHON: a = [33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194, 253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240]
         // PYTHON: arev = reversed(a)
         // PYTHON: arev = [f"{i:02X}" for i in arev]
@@ -219,7 +218,7 @@ module tb_eaglesong_absorb_comb;
             $display(" --- Done tb_eaglesong_absorb_comb -> main(). No errors.");
 
         $finish;
-    
+
     end // main()
 
 endmodule

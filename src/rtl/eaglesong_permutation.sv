@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`default_nettype none
 
 module eaglesong_permutation(
         input [31:0] state_input [15:0],
@@ -184,10 +185,10 @@ module eaglesong_permutation(
     assign const_injections[672] = 32'h71369315; assign const_injections[673] = 32'h796E6A66; assign const_injections[674] = 32'h3A7EC708; assign const_injections[675] = 32'hB05175C8; assign const_injections[676] = 32'hE02B74E7; assign const_injections[677] = 32'hEB377AD3; assign const_injections[678] = 32'h6C8C1F54; assign const_injections[679] = 32'hB980C374;
     assign const_injections[680] = 32'h59AEE281; assign const_injections[681] = 32'h449CB799; assign const_injections[682] = 32'hE01F5605; assign const_injections[683] = 32'hED0E085E; assign const_injections[684] = 32'hC9A1A3B4; assign const_injections[685] = 32'hAAC481B1; assign const_injections[686] = 32'hC935C39C; assign const_injections[687] = 32'hB7D8CE7F;
 
-    
+
     // assign inputs to internal wire/reg (in the future, store the input to a register)
     generate
-        for (i = 0; i < 16; i=i+1) begin
+        for (i = 0; i < 16; i=i+1) begin : gen_input_store
             // always_ff @(posedge start_eval) begin
             //     state_input_store[i] <= state_input[i];
             //     round_num_store <= round_num;
@@ -200,7 +201,7 @@ module eaglesong_permutation(
 
     // assign the bit_matrix stage (combinationally)
     generate
-        for (j = 0; j < 16; j=j+1) begin // j = matrix column number
+        for (j = 0; j < 16; j=j+1) begin : gen_bit_matrix_stage_assignment // j = matrix column number
             assign bitmatrix_step_output_state[j] = (
                     (( {32{const_bit_matrix[8'h00 | j]}}) & state_input_store[4'h0]) ^
                     (( {32{const_bit_matrix[8'h10 | j]}}) & state_input_store[4'h1]) ^
@@ -224,29 +225,29 @@ module eaglesong_permutation(
 
     // circulant multiplication stage
     generate
-        for (j = 0; j < 16; j++) begin
+        for (j = 0; j < 16; j++) begin : gen_circulant_stage_assignment
             assign circulant_step_output_state[j] = (
-                                (bitmatrix_step_output_state[j])  ^  
-                                (bitmatrix_step_output_state[j] << const_coefficients[3*j+1]) ^
-                                (bitmatrix_step_output_state[j] >> (32 - const_coefficients[3*j+1])) ^
-                                (bitmatrix_step_output_state[j] << const_coefficients[3*j+2]) ^
-                                (bitmatrix_step_output_state[j] >> (32 - const_coefficients[3*j+2]))
-                            );
+                            (bitmatrix_step_output_state[j])  ^
+                            (bitmatrix_step_output_state[j] << const_coefficients[3*j+1]) ^
+                            (bitmatrix_step_output_state[j] >> (32 - const_coefficients[3*j+1])) ^
+                            (bitmatrix_step_output_state[j] << const_coefficients[3*j+2]) ^
+                            (bitmatrix_step_output_state[j] >> (32 - const_coefficients[3*j+2]))
+                        );
         end
     endgenerate
 
     // injection constants stage
     generate
-        for (j = 0; j < 16; j++) begin
+        for (j = 0; j < 16; j++) begin : gen_injection_stage_assignment
             assign const_inj_idx[j] = {round_num_store[5:0], j[3:0]};
-            assign injection_step_output_state[j] = circulant_step_output_state[j] ^
-                                                        const_injections[(round_num_store << 4) | j];
+            assign injection_step_output_state[j] = circulant_step_output_state[j]
+                                                    ^ const_injections[(round_num_store << 4) | j];
         end
     endgenerate
 
     // addrotadd stage
     generate
-        for (j = 0; j < 16; j+=2) begin
+        for (j = 0; j < 16; j+=2) begin : gen_addrotadd_stage_assignment
             assign addrotadd_step_intermed1[j >> 1] = injection_step_output_state[j] + injection_step_output_state[j+1];
             assign addrotadd_step_output_state[j] = (addrotadd_step_intermed1[j >> 1] << 8) ^ (addrotadd_step_intermed1[j >> 1] >> 24);
             assign addrotadd_step_output_state[j+1] = addrotadd_step_output_state[j] + 
@@ -256,7 +257,7 @@ module eaglesong_permutation(
 
     // copy addrotadd_step_output_state (final operation) to state_output
     generate
-        for (i = 0; i < 16; i=i+1) begin
+        for (i = 0; i < 16; i=i+1) begin : gen_output_assignment
             assign state_output[i] = addrotadd_step_output_state[i];
         end
     endgenerate
@@ -297,8 +298,7 @@ module eaglesong_permutation(
     *****/
 
     /// VERIFICATION ///
-    always @(*) begin
+    always @(*) begin : verification_assert_round_num_upper_limit
         assert (round_num <= 42) else $error("round_num is greater than 42");
     end
-
 endmodule

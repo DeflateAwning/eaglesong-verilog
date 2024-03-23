@@ -6,10 +6,10 @@ module tb_eaglesong_permutation;
     //----------------------------------------------------------------
     // Internal constant and parameter definitions.
     //----------------------------------------------------------------
-    parameter DEBUG = 0;
+    parameter byte DEBUG = 0;
 
-    parameter CLK_HALF_PERIOD = 2;
-    parameter CLK_PERIOD = 2 * CLK_HALF_PERIOD;
+    parameter byte CLK_HALF_PERIOD = 2;
+    parameter byte CLK_PERIOD = 2 * CLK_HALF_PERIOD;
 
 
     //----------------------------------------------------------------
@@ -45,7 +45,7 @@ module tb_eaglesong_permutation;
         tb_clk = !tb_clk;
     end // clk_gen
 
-    task init_task;
+    task automatic init_task;
         begin
             // for fun, not really needed because we set it later
             state_input[0] <= 32'h0;
@@ -63,7 +63,7 @@ module tb_eaglesong_permutation;
     // round_num = 0;
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round0; begin
+    task automatic main_test_task_str1_round0; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test
@@ -130,7 +130,7 @@ module tb_eaglesong_permutation;
     // round_num = 3;
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round3; begin
+    task automatic main_test_task_str1_round3; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test, as it is at the output of round_num=2 (previous round)
@@ -196,7 +196,7 @@ module tb_eaglesong_permutation;
     // round_num = 15;
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round15; begin
+    task automatic main_test_task_str1_round15; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test, as it is at the output of previous round
@@ -255,7 +255,7 @@ module tb_eaglesong_permutation;
     // round_num = 16;
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round16; begin
+    task automatic main_test_task_str1_round16; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test, as it is at the output of previous round
@@ -314,7 +314,7 @@ module tb_eaglesong_permutation;
     // round_num = 42;
     // state_input is the result of input="Hello, world!\n" (str1)
     //----------------------------------------------------------------
-    task main_test_task_str1_round42; begin
+    task automatic main_test_task_str1_round42; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test, as it is at the output of previous round

@@ -6,10 +6,10 @@ module tb_eaglesong_all_permutations;
     //----------------------------------------------------------------
     // Internal constant and parameter definitions.
     //----------------------------------------------------------------
-    parameter DEBUG = 0;
+    parameter byte DEBUG = 0;
 
-    parameter CLK_HALF_PERIOD = 2;
-    parameter CLK_PERIOD = 2 * CLK_HALF_PERIOD;
+    parameter byte CLK_HALF_PERIOD = 2;
+    parameter byte CLK_PERIOD = 2 * CLK_HALF_PERIOD;
 
 
     //----------------------------------------------------------------
@@ -46,7 +46,7 @@ module tb_eaglesong_all_permutations;
         tb_clk = !tb_clk;
     end // clk_gen
 
-    task init_task;
+    task automatic init_task;
         begin
             // for fun, not really needed because we set it later
             state_input[0] <= 32'h0;
@@ -61,7 +61,7 @@ module tb_eaglesong_all_permutations;
     // Run all permutations for the 'Hello, world!\n' test.
     //----------------------------------------------------------------
     int i = 0;
-    task main_test_task_str1; begin
+    task automatic main_test_task_str1; begin
         #(CLK_PERIOD*2);
 
         // set the 'Hello, world!\n' test
@@ -96,7 +96,7 @@ module tb_eaglesong_all_permutations;
             #(CLK_PERIOD);
         end
         // #(CLK_PERIOD * 43); // should take 43ish clocks to complete
-        
+
         if (eval_output_ready !== 1'b1) begin
             $error("Assertion failed: eval_output_ready !== 1'b1");
             tb_error_cnt = tb_error_cnt + 1;
@@ -152,7 +152,6 @@ module tb_eaglesong_all_permutations;
             $display(" --- Done tb_eaglesong_all_permutations -> main(). No errors.");
 
         $finish;
-    
     end // main()
 
 endmodule
