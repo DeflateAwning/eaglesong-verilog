@@ -371,7 +371,7 @@ void EaglesongSponge( unsigned char * output, unsigned int output_length, const 
         if (i != i_max_squeeze) {
             // don't bother doing this stage for the final squeeze, as it's not actually used
             EaglesongPermutation(state);
-            printf("PERMUTATING IN SQUEEZE\n");
+            printf("PERMUTING IN SQUEEZE\n");
         }
     }
 }

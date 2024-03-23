@@ -51,6 +51,8 @@ uint8_t run_full_test(const uint8_t input_vals[], uint32_t input_length_bytes, c
     sprintf(waveform_file_name, "waveform_%s.vcd", test_name);
     m_trace->open(waveform_file_name);
 
+    printf("========== STARTING TEST %s ======================\n", test_name);
+
     ////////////
     tick();
     tick();
@@ -116,6 +118,8 @@ uint8_t run_full_test(const uint8_t input_vals[], uint32_t input_length_bytes, c
     printf("Received output: ");
     print_funky_32bit_array(dut->output_val);
 
+    printf("========== ^^ RESULTS OF TEST %s ======================\n", test_name);
+
     for (int i = 0; i < 8; i++) {
         if (dut->output_val[i] != expected_output_funky[i]) {
             printf("ERROR: output_val[%d] is not as expected. Got %08X, expected %08X.\n", i, dut->output_val[i], expected_output_funky[i]);
@@ -143,25 +147,55 @@ int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Verilated::traceEverOn(true);
 
-    const uint8_t number_of_tests = 2;
-    uint8_t test_results[number_of_tests] = {0};
+    const uint8_t number_of_tests = 6;
+    uint8_t test_results[number_of_tests];
+    memset(test_results, 0, number_of_tests);
 
     // TEST 0
-    uint8_t input_vals_0[32] = {0};
+    uint8_t input_vals_0[32];
+    memset(input_vals_0, 0, number_of_tests);
     const uint8_t input_length_bytes_0 = 14; // "Hello, world!\n"
     memcpy(input_vals_0, (uint8_t*)"Hello, world!\n", input_length_bytes_0);
     assert (strlen((char*)input_vals_0) == input_length_bytes_0);
     test_results[0] = run_full_test((const uint8_t *)input_vals_0, input_length_bytes_0, "test_0_hello_world");
 
     // TEST 1
-    uint8_t input_vals_1[32] = {0};
+    uint8_t input_vals_1[32];
     const uint8_t input_length_bytes_1 = 31; // 31 chars, plus null terminator
     memcpy(input_vals_1, (uint8_t*)"ABCDEFGHIJKLMNOPQRSTUVWXYZ12345", input_length_bytes_1);
     assert (strlen((char*)input_vals_1) == 31);
     test_results[1] = run_full_test((const uint8_t *)input_vals_1, input_length_bytes_1, "test_1_31_chars");
 
-    // TODO: add a legit 32-char test
+    // TEST 2
+    const uint8_t full_test_len = 32;
+    uint8_t input_vals_2[32]; // all the same value
+    memset(input_vals_2, 42, full_test_len);
+    test_results[2] = run_full_test((const uint8_t *)input_vals_2, full_test_len, "test_2_32_bytes_all_the_same");
+
+    // PYTHON:
+    // from random import randint
+    // print([randint(0, 255) for i in range(32)])
+
+    // TEST 3
+    uint8_t input_vals_3[32] = {182, 33, 37, 171, 74, 97, 148, 190, 119, 209, 236, 4, 184,
+                                13, 32, 5, 38, 209, 211,
+                                217, 17, 71, 125, 75, 119, 157, 25, 132, 188, 139, 167, 206};
+    test_results[3] = run_full_test((const uint8_t *)input_vals_3, full_test_len, "test_3_32_bytes_rand");
+
     // FIXME: start here! it failed last time I tried with a 32-char test a second ago
+
+    // TEST 4 (also in model)
+    uint8_t input_vals_4[32] = {33, 171, 95, 7, 243, 253, 131, 21, 216, 99, 103, 211, 165, 214, 209, 194,
+                                253, 92, 153, 235, 172, 116, 61, 142, 120, 33, 235, 89, 234, 111, 7, 240};
+    test_results[4] = run_full_test((const uint8_t *)input_vals_4, full_test_len, "test_4_32_bytes_rand");
+
+    // TEST 5 (also in model)
+    uint8_t input_vals_5[32] = {33, 203, 57, 70, 205, 255, 102, 53, 87, 12, 176, 198, 245, 211, 253, 96,
+                                221, 99, 237, 68, 110, 125, 47, 36, 80, 180, 13, 179, 2, 0, 3, 5};
+    test_results[5] = run_full_test((const uint8_t *)input_vals_5, full_test_len, "test_5_32_bytes_rand");
+
+
+    // TODO: add tests of runtime-generated random 32-byte arrays
 
     // print results
     printf("============= TEST RESULTS ============\n");
