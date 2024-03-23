@@ -14,7 +14,6 @@ module eaglesong_all_permutations(
 
     genvar i;
 
-    reg [31:0] state_input_store [15:0];
     reg [31:0] state [15:0];
     wire [31:0] perm_state_output [15:0];
     reg [5:0] round_num; // must be 0 <= round_num <= 42
@@ -40,6 +39,7 @@ module eaglesong_all_permutations(
                     if (eval_output_ready_reg == 1'b0) begin // if not yet complete
                         // if we're not through every round, then copy this round's data to state
                         state[i] <= perm_state_output[i];
+                        $display("Looping back perm_state_output[0]=%h into state", perm_state_output[0]);
                     end
                 end
             end
@@ -88,18 +88,22 @@ module eaglesong_all_permutations(
     endgenerate
     assign eval_output_ready = eval_output_ready_reg;
 
-    initial begin
-        /*
-        $monitor("Time=%d, state_input[0,1,14,15]=%h %h ... %h %h, round_num=%d, eval_output_ready_reg=%d,\nstate=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
-            $time,
-            state_input[0], state_input[1], state_input[14], state_input[15],
-            round_num, eval_output_ready_reg,
-            state[0], state[1], state[2], state[3],
-            state[4], state[5], state[6], state[7],
-            state[8], state[9], state[10], state[11],
-            state[12], state[13], state[14], state[15]
-        );
-        */
+    // initial begin
+    //     $monitor("Time=%d, state_input[0,1,14,15]=%h %h ... %h %h, round_num=%d, eval_output_ready_reg=%d,\nstate=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
+    //         $time,
+    //         state_input[0], state_input[1], state_input[14], state_input[15],
+    //         round_num, eval_output_ready_reg,
+    //         state[0], state[1], state[2], state[3],
+    //         state[4], state[5], state[6], state[7],
+    //         state[8], state[9], state[10], state[11],
+    //         state[12], state[13], state[14], state[15]
+    //     );
+    // end
+
+    // LOGGING
+    always @(posedge clk) begin
+        $display("round_num=%d, eval_output_ready_reg=%d, perm_state_input[0]=state[0]=%h, perm_state_output[0]=%h",
+            round_num, eval_output_ready_reg, state[0], perm_state_output[0]);
     end
 
 endmodule
