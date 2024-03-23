@@ -13,10 +13,6 @@ module eaglesong_permutation(
     genvar i;
     genvar j;
 
-    // if we turn this pipelined, these stores can be registers
-    wire [31:0] state_input_store [15:0];
-    wire [5:0] round_num_store;
-
     wire [31:0] bitmatrix_step_output_state [15:0];
     wire [31:0] circulant_step_output_state [15:0];
     wire [31:0] injection_step_output_state [15:0];
@@ -185,40 +181,26 @@ module eaglesong_permutation(
     assign const_injections[672] = 32'h71369315; assign const_injections[673] = 32'h796E6A66; assign const_injections[674] = 32'h3A7EC708; assign const_injections[675] = 32'hB05175C8; assign const_injections[676] = 32'hE02B74E7; assign const_injections[677] = 32'hEB377AD3; assign const_injections[678] = 32'h6C8C1F54; assign const_injections[679] = 32'hB980C374;
     assign const_injections[680] = 32'h59AEE281; assign const_injections[681] = 32'h449CB799; assign const_injections[682] = 32'hE01F5605; assign const_injections[683] = 32'hED0E085E; assign const_injections[684] = 32'hC9A1A3B4; assign const_injections[685] = 32'hAAC481B1; assign const_injections[686] = 32'hC935C39C; assign const_injections[687] = 32'hB7D8CE7F;
 
-
-    // assign inputs to internal wire/reg (in the future, store the input to a register)
-    generate
-        for (i = 0; i < 16; i=i+1) begin : gen_input_store
-            // always_ff @(posedge start_eval) begin
-            //     state_input_store[i] <= state_input[i];
-            //     round_num_store <= round_num;
-            // end
-
-            assign state_input_store[i] = state_input[i];
-        end
-    endgenerate
-    assign round_num_store = round_num;
-
     // assign the bit_matrix stage (combinationally)
     generate
         for (j = 0; j < 16; j=j+1) begin : gen_bit_matrix_stage_assignment // j = matrix column number
             assign bitmatrix_step_output_state[j] = (
-                    (( {32{const_bit_matrix[8'h00 | j]}}) & state_input_store[4'h0]) ^
-                    (( {32{const_bit_matrix[8'h10 | j]}}) & state_input_store[4'h1]) ^
-                    (( {32{const_bit_matrix[8'h20 | j]}}) & state_input_store[4'h2]) ^
-                    (( {32{const_bit_matrix[8'h30 | j]}}) & state_input_store[4'h3]) ^
-                    (( {32{const_bit_matrix[8'h40 | j]}}) & state_input_store[4'h4]) ^
-                    (( {32{const_bit_matrix[8'h50 | j]}}) & state_input_store[4'h5]) ^
-                    (( {32{const_bit_matrix[8'h60 | j]}}) & state_input_store[4'h6]) ^
-                    (( {32{const_bit_matrix[8'h70 | j]}}) & state_input_store[4'h7]) ^
-                    (( {32{const_bit_matrix[8'h80 | j]}}) & state_input_store[4'h8]) ^
-                    (( {32{const_bit_matrix[8'h90 | j]}}) & state_input_store[4'h9]) ^
-                    (( {32{const_bit_matrix[8'hA0 | j]}}) & state_input_store[4'hA]) ^
-                    (( {32{const_bit_matrix[8'hB0 | j]}}) & state_input_store[4'hB]) ^
-                    (( {32{const_bit_matrix[8'hC0 | j]}}) & state_input_store[4'hC]) ^
-                    (( {32{const_bit_matrix[8'hD0 | j]}}) & state_input_store[4'hD]) ^
-                    (( {32{const_bit_matrix[8'hE0 | j]}}) & state_input_store[4'hE]) ^
-                    (( {32{const_bit_matrix[8'hF0 | j]}}) & state_input_store[4'hF])
+                    (( {32{const_bit_matrix[8'h00 | j]}}) & state_input[4'h0]) ^
+                    (( {32{const_bit_matrix[8'h10 | j]}}) & state_input[4'h1]) ^
+                    (( {32{const_bit_matrix[8'h20 | j]}}) & state_input[4'h2]) ^
+                    (( {32{const_bit_matrix[8'h30 | j]}}) & state_input[4'h3]) ^
+                    (( {32{const_bit_matrix[8'h40 | j]}}) & state_input[4'h4]) ^
+                    (( {32{const_bit_matrix[8'h50 | j]}}) & state_input[4'h5]) ^
+                    (( {32{const_bit_matrix[8'h60 | j]}}) & state_input[4'h6]) ^
+                    (( {32{const_bit_matrix[8'h70 | j]}}) & state_input[4'h7]) ^
+                    (( {32{const_bit_matrix[8'h80 | j]}}) & state_input[4'h8]) ^
+                    (( {32{const_bit_matrix[8'h90 | j]}}) & state_input[4'h9]) ^
+                    (( {32{const_bit_matrix[8'hA0 | j]}}) & state_input[4'hA]) ^
+                    (( {32{const_bit_matrix[8'hB0 | j]}}) & state_input[4'hB]) ^
+                    (( {32{const_bit_matrix[8'hC0 | j]}}) & state_input[4'hC]) ^
+                    (( {32{const_bit_matrix[8'hD0 | j]}}) & state_input[4'hD]) ^
+                    (( {32{const_bit_matrix[8'hE0 | j]}}) & state_input[4'hE]) ^
+                    (( {32{const_bit_matrix[8'hF0 | j]}}) & state_input[4'hF])
                 );
         end
     endgenerate
@@ -239,9 +221,9 @@ module eaglesong_permutation(
     // injection constants stage
     generate
         for (j = 0; j < 16; j++) begin : gen_injection_stage_assignment
-            assign const_inj_idx[j] = {round_num_store[5:0], j[3:0]};
+            assign const_inj_idx[j] = {round_num[5:0], j[3:0]};
             assign injection_step_output_state[j] = circulant_step_output_state[j]
-                                                    ^ const_injections[(round_num_store << 4) | j];
+                                                    ^ const_injections[(round_num << 4) | j];
         end
     endgenerate
 
@@ -265,7 +247,7 @@ module eaglesong_permutation(
     /***
     initial begin
         $monitor("Time=%d, round_num=%d,\nbitmatrix_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ncirculant_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\ninjection_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h\naddrotadd_step_output_state=%h %h %h %h %h %h %h %h %h %h %h %h %h %h %h %h",
-            $time, round_num_store,
+            $time, round_num,
             bitmatrix_step_output_state[0], bitmatrix_step_output_state[1], bitmatrix_step_output_state[2],
             bitmatrix_step_output_state[3], bitmatrix_step_output_state[4], bitmatrix_step_output_state[5],
             bitmatrix_step_output_state[6], bitmatrix_step_output_state[7], bitmatrix_step_output_state[8],
@@ -298,7 +280,9 @@ module eaglesong_permutation(
     *****/
 
     /// VERIFICATION ///
-    always @(*) begin : verification_assert_round_num_upper_limit
-        assert (round_num <= 42) else $error("round_num is greater than 42");
-    end
+
+    // We actually allow this now, as the round_num increases past 42 at the end.
+    // always @(*) begin : verification_assert_round_num_upper_limit
+    //     assert (round_num <= 42) else $error("round_num is greater than 42");
+    // end
 endmodule
